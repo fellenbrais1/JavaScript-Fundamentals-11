@@ -213,3 +213,8 @@ currenciesUnique.forEach(function (value, key, map) {
 // NOTES
 // PROJECT: BANKIST APP
 // Using the application demo at bankist.netlify.app
+
+// Please take a look at the code in script.js to see the progress made on the app in this section - adding a log in function.
+
+// NOTES
+// CREATING DOM ELEMENTS

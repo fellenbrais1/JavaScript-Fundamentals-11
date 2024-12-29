@@ -6,6 +6,8 @@ console.log(`Project code.`);
 /////////////////////////////////////////////////
 // BANKIST APP
 
+// We are using objects and arrays in this app instead of maps as in real-world applications most data comes in from APIs in these formats.
+
 // Data
 const account1 = {
   owner: 'Jonas Schmedtmann',
@@ -109,6 +111,9 @@ function logInCheck(user, pin) {
     if (correctName1 === true && correctName2 === true) {
       console.log(`That username corresponds to ${account.owner}`);
       const checkResult = pinCheck(account, pin);
+      if (checkResult === true) {
+        containerApp.style.opacity = 1;
+      }
       console.log(checkResult);
       break;
     } else {
@@ -142,8 +147,7 @@ function clickLogIn() {
 }
 
 // This code prevents the log in button from refreshing the page on click, which is a button inside a form's default behaviour. This was causing issues, so I have disabled it.
-document
-  .querySelector('.login__btn')
-  .addEventListener('click', event => event.preventDefault());
+document;
+btnLogin.addEventListener('click', event => event.preventDefault());
 
-document.querySelector('.login__btn').addEventListener('click', clickLogIn);
+btnLogin.addEventListener('click', clickLogIn);
