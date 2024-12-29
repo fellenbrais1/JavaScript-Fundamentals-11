@@ -177,4 +177,39 @@ movements2.forEach(function (movement, i, arr) {
 // We cannot break out of a forEach loop, it always loops over the whole array and there is nothing we can do about it, Statements like break and continue have no effect on it. Therefore, if we might need to stop iterating through a loop early, a for of loop is a better choice, but if we need to iterate through an entire array easily, the forEach liip might be the better choice.
 
 // NOTES
-// FOREACH WITH SETS AND MAPS
+// FOREACH WITH MAPS AND SETS
+// We can also use forEach with maps and sets.
+
+// MAPS
+const currencies2 = new Map([
+  ['USD', 'United States dollar'],
+  ['EUR', 'Euro'],
+  ['GBP', 'Pound sterling'],
+]);
+
+console.log(`===========================`);
+
+// A map feed three arguments into forEach as well, but in this case they are the value, its key, and the whole map to be iterated over. We can access any of these properties easily within the forEach logic.
+currencies2.forEach(function (value, key, map) {
+  console.log(`${key}: ${value}`);
+});
+
+// SETS
+const currenciesUnique = new Set(['USD', 'GDP', 'USD', 'EUR', 'EUR']);
+console.log(currenciesUnique);
+
+console.log(`========================`);
+
+// For sets, things work a little differently, the forEach has the same signature in terms of parameters as using forEach with a map, however, a set does not have keys or index values, so actually the first and second arguments are the same as one another.
+
+// We can see in the forEach below that the values of value and key are the same as one another, so we may as well call the second argument the same as the first. These are called 'throwaway variables' in programming.
+
+currenciesUnique.forEach(function (value, key, map) {
+  console.log(`${key}: ${value}`);
+});
+
+// This was done so as not to confuse programmers with another different signature, but just keep this in mind, as it is unlikely we will need to do this with sets anyway.
+
+// NOTES
+// PROJECT: BANKIST APP
+// Using the application demo at bankist.netlify.app

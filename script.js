@@ -35,7 +35,14 @@ const account4 = {
   pin: 4444,
 };
 
-const accounts = [account1, account2, account3, account4];
+const account5 = {
+  owner: 'Michael McCann',
+  movements: [800, 1650, 710, 990, 10],
+  interestRate: 2.5,
+  pin: 5585,
+};
+
+const accounts = [account1, account2, account3, account4, account5];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -76,3 +83,67 @@ const currencies = new Map([
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
+
+// Breaks apart the username specified by the user and checks to see if the letters match up to an account, then runs the pinCheck() function to see if the PIN number mathces, before granting access.
+
+// This only currently works for usernames of 2 characters in length, this needs to be addressed as some users have more than 2 names.
+
+function logInCheck(user, pin) {
+  // Gets the letters of the username and destructures them into 2 variables
+  const [userString1, userString2] = [...user];
+
+  for (const account of accounts) {
+    let correctName1,
+      correctName2 = false;
+
+    const splitName = account.owner.toLowerCase().split(' ');
+
+    if (splitName[0].toLowerCase().startsWith(userString1)) {
+      correctName1 = true;
+    }
+
+    if (splitName[1].startsWith(userString2)) {
+      correctName2 = true;
+    }
+
+    if (correctName1 === true && correctName2 === true) {
+      console.log(`That username corresponds to ${account.owner}`);
+      const checkResult = pinCheck(account, pin);
+      console.log(checkResult);
+      break;
+    } else {
+      console.log(`That username does not correspond to any user on record.`);
+      continue;
+    }
+  }
+}
+
+// A function to check that the PIN number is correct on a user log-in attempt.
+function pinCheck(account, pin) {
+  console.log(`Now checking PIN number...`);
+  if (pin === account.pin) {
+    console.log(`PIN correct, welcome ${account.owner}!`);
+    return true;
+  } else {
+    console.log(`PIN is not correct, access denied!`);
+    return false;
+  }
+}
+
+// Run when the login button is clicked, it gathers the values inside the input fields and then calls the logInCheck() function.
+function clickLogIn() {
+  const usernameInput = document.querySelector('.login__input--user').value;
+  let pinInput = Number(document.querySelector('.login__input--pin').value);
+  if (usernameInput === '' || pinInput === 0) {
+    alert('Please enter both username and PIN.');
+    return;
+  }
+  logInCheck(usernameInput, pinInput);
+}
+
+// This code prevents the log in button from refreshing the page on click, which is a button inside a form's default behaviour. This was causing issues, so I have disabled it.
+document
+  .querySelector('.login__btn')
+  .addEventListener('click', event => event.preventDefault());
+
+document.querySelector('.login__btn').addEventListener('click', clickLogIn);
