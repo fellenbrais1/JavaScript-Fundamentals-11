@@ -11,6 +11,7 @@ console.log(`Project code.`);
 // Data
 const account1 = {
   owner: 'Jonas Schmedtmann',
+  alias: 'js',
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
   pin: 1111,
@@ -18,6 +19,7 @@ const account1 = {
 
 const account2 = {
   owner: 'Jessica Davis',
+  alias: 'jd',
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
@@ -25,6 +27,7 @@ const account2 = {
 
 const account3 = {
   owner: 'Steven Thomas Williams',
+  alias: 'stw',
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
@@ -32,6 +35,7 @@ const account3 = {
 
 const account4 = {
   owner: 'Sarah Smith',
+  alias: 'ss',
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
@@ -39,7 +43,8 @@ const account4 = {
 
 const account5 = {
   owner: 'Michael McCann',
-  movements: [800, 1650, 710, 990, 10],
+  alias: 'mm',
+  movements: [800, 1650, -710, 990, -10],
   interestRate: 2.5,
   pin: 5585,
 };
@@ -86,35 +91,21 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 
-// Breaks apart the username specified by the user and checks to see if the letters match up to an account, then runs the pinCheck() function to see if the PIN number mathces, before granting access.
-
-// This only currently works for usernames of 2 characters in length, this needs to be addressed as some users have more than 2 names.
+// Checks to see if the typedo in username corresponds to an account, then runs the pinCheck() function to see if the PIN number mathces, before granting access.
 
 function logInCheck(user, pin) {
-  // Gets the letters of the username and destructures them into 2 variables
-  const [userString1, userString2] = [...user];
-
   for (const account of accounts) {
-    let correctName1,
-      correctName2 = false;
-
-    const splitName = account.owner.toLowerCase().split(' ');
-
-    if (splitName[0].toLowerCase().startsWith(userString1)) {
-      correctName1 = true;
-    }
-
-    if (splitName[1].startsWith(userString2)) {
-      correctName2 = true;
-    }
-
-    if (correctName1 === true && correctName2 === true) {
+    // Checks to see if the username corresponds to the account.owner or the account.alias
+    if (user === account.owner || user === account.alias) {
       console.log(`That username corresponds to ${account.owner}`);
       const checkResult = pinCheck(account, pin);
       if (checkResult === true) {
         containerApp.style.opacity = 1;
+      } else {
+        break;
       }
       console.log(checkResult);
+      populateMovements(account.movements);
       break;
     } else {
       console.log(`That username does not correspond to any user on record.`);
@@ -144,6 +135,32 @@ function clickLogIn() {
     return;
   }
   logInCheck(usernameInput, pinInput);
+}
+
+// We can create a HTML element to be added using a template string to hold the code
+function populateMovements(movements) {
+  // This expression clears all of the HTML out of the element to make it empty, we set the container to an empty string, which results in no content
+  containerMovements.innerHTML = '';
+
+  // 'innerHTML' is similar to textContent, the difference is that textContext simply returns the text itself, but innerHTML returns everything including the HTML
+
+  // Iterate through the movements and add their amount and index number to some HTML in a string literal along with types and times etc.
+  movements.forEach(function (amount, index) {
+    const type = amount > 0 ? 'deposit' : 'withdrawal';
+    const time = `NOW`;
+
+    // Create the HTML that we need in a string literal
+    const html = `<div class="movements__row">
+    <div class="movements__type movements__type--${type}">${
+      index + 1
+    } ${type}</div>
+    <div class="movements__date">${time}</div>
+    <div class="movements__value">${amount}€</div>
+    </div>`;
+
+    // Add the above HTML to the element
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
 }
 
 // This code prevents the log in button from refreshing the page on click, which is a button inside a form's default behaviour. This was causing issues, so I have disabled it.

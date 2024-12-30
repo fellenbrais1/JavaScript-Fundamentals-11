@@ -218,3 +218,68 @@ currenciesUnique.forEach(function (value, key, map) {
 
 // NOTES
 // CREATING DOM ELEMENTS
+// Manipulating the DOM through various different techniques and with the '.forEach()' method.
+
+console.log(`========================`);
+
+// In order to add html to a webpage, we can first create the HTML using a string literal. This allows us to add dynamic elements to the HTML based on our needs. The below example is how we might do it.
+
+// const html = `<div class="movements__row">
+//     <div class="movements__type movements__type--${type}">${
+//   index + 1
+// } ${type}</div>
+//     <div class="movements__date">${time}</div>
+//     <div class="movements__value">${amount}€</div>
+//     </div>`;
+
+// Once our HTML is created, we can choose which container or other element we want to add it to. To do this we can use the '.insertAdjacentHTML()' method. This method takes two arguments, the first being the position we want to insert the HTML in the element, these are:
+
+// 'beforebegin' - inserts the content before the element itself.
+// 'afterbegin' - inserts the content at the beginning of the element's content.
+// 'beforeend' - inserts the content at the end of the element's content.
+// 'afterend' - inserts the content after the element itself.
+
+// When using any of these position statements they must be within quotation marks to work.
+
+// The second argument is the string that we want to insert, we could insert the string literal we made earlier to do this.
+
+// containerMovements.insertAdjacentHTML('afterbegin', html);
+
+// Sometimes we might want to clear an HTML element of its content before we add other stuff to it (or for a variety of other reasons). We can do this by setting the innnerHTML property of an element to an empty string, like so.
+
+// containerMovements.innerHTML = '';
+
+// NOTES
+// CHALLENGE 1
+// Create a function that takes in arrays of dog ages and then tells us whether the dog is a puppy or an adult.
+
+console.log('=====================');
+
+const dogAgesJulia = [3, 5, 8, 1, 1, 2, 4, 12, 15, 3];
+const dogAgesKate = [3, 4, 6, 1, 1, 1, 4, 1, 11, 13];
+
+console.log(dogAgesJulia);
+console.log(dogAgesKate);
+
+// Julia really fucked up man. Like, she really fucked up. The first and last two dogs of her survey were actually cats, the dumb idiot. We create a shallow copy of the array with the erroneous pets omitted. I have made the function below dynamic in that it could accept any array of dog ages, so it doesn't really make sense to do this within the function.
+const correctedDogAgesJulia = dogAgesJulia.slice(1, -2);
+console.log(correctedDogAgesJulia);
+
+// We could have also removed the erroneous ages with a series of '.splice()' methods as well.
+
+function checkDogAges(arr1, arr2) {
+  const unifiedArr = arr1.concat(arr2);
+  console.log(unifiedArr);
+  unifiedArr.forEach(function (dog, index) {
+    if (dog >= 3) {
+      console.log(`Dog ${index + 1} is an adult and is ${dog} years old. 🦮`);
+    } else {
+      console.log(`Dog ${index + 1} is a puppy and is ${dog} years old. 🐶`);
+    }
+  });
+}
+
+checkDogAges(correctedDogAgesJulia, dogAgesKate);
+
+// NOTES
+// DATA TRANSFORMATIONS: MAP, FILTER, REDUCE
