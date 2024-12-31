@@ -11,7 +11,6 @@ console.log(`Project code.`);
 // Data
 const account1 = {
   owner: 'Jonas Schmedtmann',
-  alias: 'js',
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
   pin: 1111,
@@ -19,7 +18,6 @@ const account1 = {
 
 const account2 = {
   owner: 'Jessica Davis',
-  alias: 'jd',
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
@@ -27,7 +25,6 @@ const account2 = {
 
 const account3 = {
   owner: 'Steven Thomas Williams',
-  alias: 'stw',
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
@@ -35,7 +32,6 @@ const account3 = {
 
 const account4 = {
   owner: 'Sarah Smith',
-  alias: 'ss',
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
@@ -43,7 +39,6 @@ const account4 = {
 
 const account5 = {
   owner: 'Michael McCann',
-  alias: 'mm',
   movements: [800, 1650, -710, 990, -10],
   interestRate: 2.5,
   pin: 5585,
@@ -54,7 +49,7 @@ const accounts = [account1, account2, account3, account4, account5];
 // Elements
 const labelWelcome = document.querySelector('.welcome');
 const labelDate = document.querySelector('.date');
-const labelBalance = document.querySelector('.balance__value');
+const labelBalance = document.querySelector('.balance');
 const labelSumIn = document.querySelector('.summary__value--in');
 const labelSumOut = document.querySelector('.summary__value--out');
 const labelSumInterest = document.querySelector('.summary__value--interest');
@@ -94,23 +89,37 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 // Checks to see if the typedo in username corresponds to an account, then runs the pinCheck() function to see if the PIN number mathces, before granting access.
 
 function logInCheck(user, pin) {
+  let foundMatch = false;
   for (const account of accounts) {
     // Checks to see if the username corresponds to the account.owner or the account.alias
     if (user === account.owner || user === account.alias) {
       console.log(`That username corresponds to ${account.owner}`);
+      foundMatch = true;
       const checkResult = pinCheck(account, pin);
       if (checkResult === true) {
         containerApp.style.opacity = 1;
       } else {
+        containerApp.style.opacity = 0;
+        alert(`Sorry, that PIN number is not correct`);
+        clearCredentials();
+        resetWelcome();
         break;
       }
       console.log(checkResult);
-      populateMovements(account.movements);
+      logInController(account);
       break;
     } else {
-      console.log(`That username does not correspond to any user on record.`);
+      console.log(
+        `That username does not match the currently iterated record.`
+      );
       continue;
     }
+  }
+  if (!foundMatch) {
+    alert(`That username does not correspond to any user on record.`);
+    containerApp.style.opacity = 0;
+    clearCredentials();
+    resetWelcome();
   }
 }
 
@@ -128,10 +137,13 @@ function pinCheck(account, pin) {
 
 // Run when the login button is clicked, it gathers the values inside the input fields and then calls the logInCheck() function.
 function clickLogIn() {
-  const usernameInput = document.querySelector('.login__input--user').value;
-  let pinInput = Number(document.querySelector('.login__input--pin').value);
+  const usernameInput = inputLoginUsername.value;
+  let pinInput = Number(inputLoginPin.value);
   if (usernameInput === '' || pinInput === 0) {
     alert('Please enter both username and PIN.');
+    containerApp.style.opacity = 0;
+    resetWelcome();
+    clearCredentials();
     return;
   }
   logInCheck(usernameInput, pinInput);
@@ -169,41 +181,14 @@ btnLogin.addEventListener('click', event => event.preventDefault());
 
 btnLogin.addEventListener('click', clickLogIn);
 
+// Converting EURO to USD.
 const eurToUsd = 1.1;
 
-// To change an amount in EUR to USD
-// Whatever we return from the callback function is placed into the new array at the same position as the value we are iterating over. The original array is not altered at all, but a new array is generated.
-
-// As an arrow function.
 const movementsUSD = movements.map(move => move * eurToUsd);
-
-// As a more explicit function expression.
-// cosnt movementsUSD = movements.map(function(move) {
-//   return move * eurToUsd;
-// });
-
-// If we choose to use an arrow function it can make it harder to see that we are using a function to do something. It might be better to make the code more explicit to acheive better readability.
 
 console.log(movements);
 console.log(movementsUSD);
 
-// We could also do this easily with a for of loop like this.
-const newArr = [];
-for (const move of movements) {
-  newArr.push(move * eurToUsd);
-}
-
-console.log(newArr);
-
-// In the map method we use a function to solve our problem, but when using for of loops we are explicitly doing everything. Functional programming is more in vogue and more modern so it is usually better and simpler to use a callback function inside a method.
-
-// We can also loop over the movements array and a more descriptive array using the template literal we used before.
-
-// It is completely okay to have multiple return statements in the same piece of code, as long as only one of them can be executed at any one time.
-
-// Any code that has a field that could be more than one option, such as 'type' in this case could be calculated a lot more simply by using a ternary operator.
-
-// It might be a nice idea to simplify a callback function to an arrow function if it is possible as it will reduce the length and complexity of the code by a significant amount.
 const movementsDescriptions = movements.map(
   (move, index, arr) =>
     `Movement ${index + 1}: You ${
@@ -213,4 +198,84 @@ const movementsDescriptions = movements.map(
 
 console.log(movementsDescriptions);
 
-// If we do someting within a function that we can instantly see in the console etc. it is called a side effect. Functions can either generate side effects or not and sometimes they might be neccesasary or not.
+// Adding aliases to each account for login purposes.
+
+// Programatically generates aliases for each account based on the first letters of each name in their owner property.
+function createAliases(accounts) {
+  accounts.forEach(
+    account =>
+      (account.alias = account.owner
+        .toLowerCase()
+        .split(' ')
+        .map(current => current.slice(0, 1))
+        .join(''))
+  );
+}
+
+createAliases(accounts);
+console.log(accounts);
+
+function populateBalance(movements) {
+  const balanceTotal = movements.reduce((accumulator, currentValue) => {
+    return accumulator + currentValue;
+  });
+
+  const time = generateTimestamp();
+  const currency = '€';
+
+  const balanceHTML = `<div>
+      <p class="balance__label">Current balance</p>
+      <p class="balance__date">
+        As of <span class="date">${time}</span>
+      </p>
+      </div>
+        <p class="balance__value">${balanceTotal}${currency}</p>
+      </div>`;
+
+  labelBalance.innerHTML = balanceHTML;
+}
+
+function generateTimestamp() {
+  const time = Date.now();
+  const timeString = new Date(time).toISOString();
+  console.log(timeString);
+
+  const options = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    timeZone: 'UTC',
+  };
+
+  const formattedTimeString = new Intl.DateTimeFormat('en-UK', options).format(
+    time
+  );
+
+  console.log(formattedTimeString);
+  return formattedTimeString;
+}
+
+function populateWelcome(owner) {
+  labelWelcome.textContent = `Welcome, ${owner}!`;
+}
+
+// Resets the welcome message in case something goes wrong
+function resetWelcome() {
+  setTimeout(() => {
+    labelWelcome.textContent = 'Log in to get started';
+  }, 1000);
+}
+
+function clearCredentials() {
+  inputLoginUsername.value = '';
+  inputLoginPin.value = '';
+}
+
+// clearCredentials();
+
+function logInController(account) {
+  populateWelcome(account.owner);
+  populateMovements(account.movements);
+  populateBalance(account.movements);
+  clearCredentials();
+}

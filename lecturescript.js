@@ -326,3 +326,55 @@ console.log(reduceArrTotal);
 // Remember that unlike forEach, map will give us a new array with the code expressed in the callback function applied to it.
 
 // Code for this section is in the project script.
+
+const eurToUsd = 1.1;
+
+// To change an amount in EUR to USD
+// Whatever we return from the callback function is placed into the new array at the same position as the value we are iterating over. The original array is not altered at all, but a new array is generated.
+
+// As an arrow function.
+const movements2USD = movements2.map(move => move * eurToUsd);
+
+// As a more explicit function expression.
+// cosnt movementsUSD = movements.map(function(move) {
+//   return move * eurToUsd;
+// });
+
+// If we choose to use an arrow function it can make it harder to see that we are using a function to do something. It might be better to make the code more explicit to acheive better readability.
+
+console.log(movements2);
+console.log(movements2USD);
+
+// We could also do this easily with a for of loop like this.
+const newArr = [];
+for (const move of movements2) {
+  newArr.push(move * eurToUsd);
+}
+
+console.log(newArr);
+
+// In the map method we use a function to solve our problem, but when using for of loops we are explicitly doing everything. Functional programming is more in vogue and more modern so it is usually better and simpler to use a callback function inside a method.
+
+// We can also loop over the movements array and a more descriptive array using the template literal we used before.
+
+// It is completely okay to have multiple return statements in the same piece of code, as long as only one of them can be executed at any one time.
+
+// Any code that has a field that could be more than one option, such as 'type' in this case could be calculated a lot more simply by using a ternary operator.
+
+// It might be a nice idea to simplify a callback function to an arrow function if it is possible as it will reduce the length and complexity of the code by a significant amount.
+const movementsDescriptions = movements2.map(
+  (move, index, arr) =>
+    `Movement ${index + 1}: You ${
+      move > 0 ? 'deposited' : 'withdrew'
+    } ${Math.abs(move)}`
+);
+
+console.log(movementsDescriptions);
+
+// If we do someting within a function that we can instantly see in the console etc. it is called a side effect. Functions can either generate side effects or not and sometimes they might be neccesasary or not.
+
+// NOTES
+// COMPUTING USERNAMES
+// It would be easier to generate the user's alias programmatically, instead of typing in an 'alias' property manually.
+
+// Code for this section will be in the script.js file.
