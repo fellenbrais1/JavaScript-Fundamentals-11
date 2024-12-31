@@ -283,3 +283,46 @@ checkDogAges(correctedDogAgesJulia, dogAgesKate);
 
 // NOTES
 // DATA TRANSFORMATIONS: MAP, FILTER, REDUCE
+// These are imnportant array methods that we use when creating new arrays and transforming data coming from other arrays.
+
+// MAP
+// A method that can be used to loop over arrays, it is similar to the forEach method from before, but map creates a new array based on the array iterated over.
+// This allows us to, for example, multiply all elements in a array by two and put these elements into a new array.
+// Map is so called because it maps the elements in one array directly to a new array.
+
+const mapArr = [3, 1, 4, 3, 2];
+console.log(mapArr);
+
+const newMapArr = mapArr.map(current => current * 2);
+console.log(newMapArr);
+
+// FILTER
+// Used to filter for elements in the original array that satisfy a particular condition. We specify a test and then all elements that pass are mapped into a new array. Other elements will get filtered out and not be included in the new array.
+
+const filterArr = [3, 1, 4, 3, 2];
+console.log(filterArr);
+
+const newFilterArr = filterArr.filter(current => current > 2);
+console.log(newFilterArr);
+
+// REDUCE
+// We use this to boil down all of the elements in an array into one result. For example, we could add up all values in an array and add each the values onto an accumulator. We can then return the final value at the end. This is also known as the snowball effect, as things will add into one value at the end.
+
+const reduceArr = [3, 1, 4, 3, 2];
+console.log(reduceArr);
+
+const reduceArrTotal = reduceArr.reduce((accumulator, currentValue) => {
+  return accumulator + currentValue;
+});
+
+console.log(reduceArrTotal);
+
+// All of these methods work a little like forEach, in that they take a callback function as an argument. This can sometimes be an arrow function, but other times needs to be a function definition if more complex. Like forEach, the element named inside the callback function can be called anything, but 'current' is the standard.
+
+// Reduce is a bit more complicated in that it can accept up to four arguments. These are the accumulator, the current value, the current index, and the whole array to be iterated over. We usually only have to specify the first two to do something like adding all values together.
+
+// NOTES
+// THE MAP METHOD
+// Remember that unlike forEach, map will give us a new array with the code expressed in the callback function applied to it.
+
+// Code for this section is in the project script.
