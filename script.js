@@ -279,8 +279,6 @@ function formatCurrencyString(amount, baseCurrency, additional = null) {
         } else {
           currencyString = `-$${unsignedAmount.toFixed(2)}`;
         }
-      } else if (amount === 0) {
-        currencyString = `$${unsignedAmount.toFixed(2)}`;
       } else {
         currencyString = `$${unsignedAmount.toFixed(2)}`;
       }
@@ -292,16 +290,12 @@ function formatCurrencyString(amount, baseCurrency, additional = null) {
         } else {
           currencyString = `-£${unsignedAmount.toFixed(2)}`;
         }
-      } else if (amount === 0) {
-        currencyString = `£${unsignedAmount.toFixed(2)}`;
       } else {
         currencyString = `£${unsignedAmount.toFixed(2)}`;
       }
       break;
     case '€':
       if (additional === 'nosign') {
-        currencyString = `${unsignedAmount.toFixed(2)}€`;
-      } else if (amount === 0) {
         currencyString = `${unsignedAmount.toFixed(2)}€`;
       } else {
         currencyString = `${unsignedAmount.toFixed(2)}€`;
