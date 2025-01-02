@@ -31,6 +31,7 @@ const account3 = {
   baseCurrency: '£',
 };
 
+// Test of no negative values at all
 const account4 = {
   owner: 'Sarah Smith',
   movements: [430, 1000, 700, 50, 90],
@@ -43,11 +44,47 @@ const account5 = {
   owner: 'Michael McCann',
   movements: [800, 1650, -710, 990, -10],
   interestRate: 2.5,
-  pin: 5585,
+  pin: 5555,
   baseCurrency: '£',
 };
 
-const accounts = [account1, account2, account3, account4, account5];
+// Test of no positive values at all
+const account6 = {
+  owner: 'James Raynor',
+  movements: [-8, -160, -10, -300, -15],
+  interestRate: 1.5,
+  pin: 6666,
+  baseCurrency: '£',
+};
+
+// Test of 0 balance
+const account7 = {
+  owner: 'Sarah Kerrigan',
+  movements: [-800, 800],
+  interestRate: 1.5,
+  pin: 7777,
+  baseCurrency: '$',
+};
+
+// Test of decimal amounts in movements
+const account8 = {
+  owner: 'Arcturus Mengsk',
+  movements: [-100.5, 80030.75, 2450.99, 881.18, -1043.68],
+  interestRate: 1.5,
+  pin: 8888,
+  baseCurrency: '$',
+};
+
+const accounts = [
+  account1,
+  account2,
+  account3,
+  account4,
+  account5,
+  account6,
+  account7,
+  account8,
+];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -84,8 +121,6 @@ const currencies = new Map([
   ['GBP', 'Pound sterling'],
 ]);
 
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
-
 // Used to dictate error messages based on being logged in or not
 let loggedIn = false;
 
@@ -111,8 +146,9 @@ function createAliases(accounts) {
 // Gathers the values inside the input fields for login and then calls the logInCheck() function.
 // Run when login button is clicked via event handler
 function clickLogIn() {
-  // To reset any timers - EXPERIMENTAL
+  // To reset any timers
   timerCountdown('reset');
+
   const usernameInput = inputLoginUsername.value;
   let pinInput = Number(inputLoginPin.value);
   if (usernameInput === '' || pinInput === 0) {
@@ -127,20 +163,19 @@ function clickLogIn() {
 function logInCheck(user, pin) {
   let foundMatch = false;
   let lowercaseUser = user.toLowerCase();
-  for (const account of accounts) {
-    // Checks to see if the username corresponds to the account.owner or the account.alias
-    if (lowercaseUser === account.owner || lowercaseUser === account.alias) {
-      foundMatch = true;
-      const checkResult = pinCheck(account, pin);
-      if (checkResult === false) {
-        logOut('invalidPIN');
-        break;
-      }
-      logInController(account);
-      break;
-    } else {
-      continue;
+
+  const matchAccount = accounts.find(
+    account => account.alias === lowercaseUser
+  );
+  console.log(matchAccount);
+  if (matchAccount !== 'undefined') {
+    foundMatch = true;
+    const checkResult = pinCheck(matchAccount, pin);
+    if (checkResult === false) {
+      logOut('invalidPIN');
     }
+    logInController(matchAccount);
+    return;
   }
   if (!foundMatch) {
     logOut('nomatch');
@@ -190,7 +225,7 @@ function populateMovements(movements, baseCurrency) {
   // Iterate through the movements and add their amount and index number to some HTML in a string literal along with types and times etc.
   movements.forEach(function (amount, index) {
     const type = amount > 0 ? 'deposit' : 'withdrawal';
-    const time = `NOW`;
+    const time = generateTimestamp();
 
     const currencyString = formatCurrencyString(amount, baseCurrency);
     // Create the HTML that we need in a string literal
@@ -231,39 +266,45 @@ function populateBalance(movements, baseCurrency) {
 
 // Formats the currency strings when amounts need to be displayed, based on the baseCurrency of the account
 // Called by populateMovements(), populateBalance(), populateTotals()
-function formatCurrencyString(balanceTotal, baseCurrency, additional = null) {
+function formatCurrencyString(amount, baseCurrency, additional = null) {
   // Math.abs() returns an unsigned integer we can use if we need to
-  let unsignedBalanceTotal = Math.abs(balanceTotal);
+  let unsignedAmount = Math.abs(amount);
   let currencyString;
 
   switch (baseCurrency) {
     case '$':
-      if (balanceTotal < 0) {
+      if (amount < 0) {
         if (additional === 'nosign') {
-          currencyString = `$${unsignedBalanceTotal.toFixed(2)}`;
+          currencyString = `$${unsignedAmount.toFixed(2)}`;
         } else {
-          currencyString = `-$${unsignedBalanceTotal.toFixed(2)}`;
+          currencyString = `-$${unsignedAmount.toFixed(2)}`;
         }
+      } else if (amount === 0) {
+        currencyString = `$${unsignedAmount.toFixed(2)}`;
       } else {
-        currencyString = `$${balanceTotal}`;
+        currencyString = `$${unsignedAmount.toFixed(2)}`;
       }
       break;
     case '£':
-      if (balanceTotal < 0) {
+      if (amount < 0) {
         if (additional === 'nosign') {
-          currencyString = `$${unsignedBalanceTotal.toFixed(2)}`;
+          currencyString = `$${unsignedAmount.toFixed(2)}`;
         } else {
-          currencyString = `-£${unsignedBalanceTotal.toFixed(2)}`;
+          currencyString = `-£${unsignedAmount.toFixed(2)}`;
         }
+      } else if (amount === 0) {
+        currencyString = `£${unsignedAmount.toFixed(2)}`;
       } else {
-        currencyString = `£${balanceTotal}`;
+        currencyString = `£${unsignedAmount.toFixed(2)}`;
       }
       break;
     case '€':
       if (additional === 'nosign') {
-        currencyString = `${unsignedBalanceTotal}€`;
+        currencyString = `${unsignedAmount.toFixed(2)}€`;
+      } else if (amount === 0) {
+        currencyString = `${unsignedAmount.toFixed(2)}€`;
       } else {
-        currencyString = `${balanceTotal}€`;
+        currencyString = `${unsignedAmount.toFixed(2)}€`;
       }
       break;
     default:
@@ -277,40 +318,26 @@ function formatCurrencyString(balanceTotal, baseCurrency, additional = null) {
 function populateTotals(movements, interest, baseCurrency) {
   // Calculate the total amount incoming
   const depositsArr = movements.filter(move => move > 0);
-  console.log(`POOP ${depositsArr}`);
   let inTotal = depositsArr;
 
   // Error handling in the case of no positive movements in the array
   if (depositsArr.length === 0) {
-    inTotal = 0;
+    inTotal = 0.0;
   } else {
     inTotal = inTotal.reduce((acc, value) => acc + value).toFixed(2);
   }
-
-  console.log(inTotal);
 
   // Calculate the total amount outgoing
   let outTotal = movements.filter(move => move < 0);
 
   // Error handling in the case of no negative movements in the array
   if (outTotal.length === 0) {
-    outTotal = 0;
+    outTotal = 0.0;
   } else {
     outTotal = outTotal.reduce((acc, value) => acc + value).toFixed(2);
   }
 
-  // Calculate the amount of interest
-  // let interestTotal = (
-  //   movements.reduce(
-  //     (accumulator, currentValue) => accumulator + currentValue
-  //   ) *
-  //   (interest / 100)
-  // ).toFixed(2);
-
-  console.log(`Deposits Array: ${depositsArr}`);
-
   let interestTotal = calculateInterest(depositsArr, interest);
-  console.log(`Interest Total: ${interestTotal}`);
 
   // Update the HTML content with these totals
   labelSumIn.textContent = formatCurrencyString(inTotal, baseCurrency);
@@ -325,14 +352,25 @@ function populateTotals(movements, interest, baseCurrency) {
   );
 }
 
+// Calculates and interest total summed from all deposits that accrue over over 1.00 in calculated interest
+// Called by populateTotals()
 function calculateInterest(deposits, interestRate) {
-  const interestAmounts = deposits
+  let interestAmounts = deposits
     .map(deposit => {
-      deposit * (interestRate / 100);
-      return deposit;
+      const interest = deposit * (interestRate / 100);
+      return interest;
     })
-    .reduce((acc, cur) => acc + cur, 0);
-  console.log(interestAmounts);
+    .filter(amount => amount > 1);
+
+  if (interestAmounts.length === 0) {
+    interestAmounts = 0.0;
+  } else {
+    interestAmounts = interestAmounts
+      .reduce((acc, amount) => acc + amount)
+      .toFixed(2);
+  }
+
+  return interestAmounts;
 }
 
 // Generates a current timestamp when invoked
@@ -471,13 +509,14 @@ btnLogin.addEventListener('click', event => event.preventDefault());
 
 btnLogin.addEventListener('click', clickLogIn);
 
+// EXPERIMENTAL CODE SNIPPETS
+
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
 // Converting EURO to USD.
 const eurToUsd = 1.1;
 
 const movementsUSD = movements.map(move => move * eurToUsd);
-
-// console.log(movements);
-// console.log(movementsUSD);
 
 const movementsDescriptions = movements.map(
   (move, index, arr) =>
@@ -485,7 +524,3 @@ const movementsDescriptions = movements.map(
       move > 0 ? 'deposited' : 'withdrew'
     } ${Math.abs(move)}`
 );
-
-// console.log(movementsDescriptions);
-
-// calculateInterest();

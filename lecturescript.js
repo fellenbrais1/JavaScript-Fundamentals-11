@@ -533,4 +533,45 @@ console.log(totalDepositsUSD.toFixed(2));
 
 // I have now had to break up the chaining a little in the populateTotals() function. Before, amounts would not be properly generated if a movements array had no positives or no negatives as the '.reduce()' method will crash if it tries to iterate over an empty array. The lesson here is that chaining arrays is useful but not always appropriate. Sometimes error handling demands we break things into chunks where potential errors can be handled.
 
+// Also, a huge number of methods chained together can create significant performance issues. If we generate too many new arrays then the stack has to hold a lot of them all at once, and this can lead to stack overflow if handled poorly. We should try to compress all of functionality a chain has to do in as few methods as possible.
+
+// We should always try to make the code as efficient as possible, and try to avoid chaining methods that mutate the original array, as this can introduce bugs that can be ferociously difficult to hunt down.
+
 // NOTES
+// CHALLENGE 3
+// Rewriting the code from challenge 2 into one arrow function that makes use of chaining
+
+// Here calculating the average values directly in the .reduce() method is the only way to do this if we wanted everything to be done by the same arrow function.
+const calcAverageHumanAge2 = ages =>
+  ages
+    .map(age => (age <= 2 ? (age = 2 * age) : (age = 16 + age * 4)))
+    .filter(age => age >= 18)
+    .reduce((acc, age, i, arr) => (acc += age / arr.length), 0);
+
+// It might be more logical to break up the chain a little, but its not too hard to read if you know what all of the methods are doing.
+
+console.log(calcAverageHumanAge2(unifiedDogAges)); // 44
+console.log(calcAverageHumanAge2(testData1)); // 44
+console.log(calcAverageHumanAge2(testData2)); // 47.33...
+
+// NOTES
+// THE FIND METHOD
+
+// The .find() method can be used to retrieve one element from an array based on a condition. This could be used to rewrite the login prodedure for the login for the app.
+
+// .find() also loops over an array and retrieves an element based on the condition specified. The .find() method will not return a new array, just the first element in the array where the condition returns true.
+
+const firstWithdrawal = movements2.find(move => move < 0);
+console.log(movements2);
+console.log(firstWithdrawal); // -400
+
+// '.filter()' returns all of the elements that match the condition but .'.find()' only returns the first element that matches the condition. Also, '.filter()' returns a new array and '.filter()' only returns one value.
+
+const firstDeposit = movements2.find(move => move > 0);
+console.log(movements2);
+console.log(firstDeposit);
+
+// I have updated the logInCheck() function in the app to use the .find() method instead of using a for of loop that I was using before.
+
+// NOTES
+// IMPLEMENTING LOGIN
