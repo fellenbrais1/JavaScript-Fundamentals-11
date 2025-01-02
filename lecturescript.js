@@ -281,9 +281,10 @@ function checkDogAges(arr1, arr2) {
       console.log(`Dog ${index + 1} is a puppy and is ${dog} years old. 🐶`);
     }
   });
+  return unifiedArr;
 }
 
-checkDogAges(correctedDogAgesJulia, dogAgesKate);
+const unifiedDogAges = checkDogAges(correctedDogAgesJulia, dogAgesKate);
 
 // NOTES
 // DATA TRANSFORMATIONS: MAP, FILTER, REDUCE
@@ -445,5 +446,91 @@ for (const move of movements2) balance2 += move;
 console.log(balance2);
 
 // As we don't need to go to the trouble of setting up an external accumulator, using the '.reduce()' method can be a lot easier than using for of loops.
+
+// We can use the '.reduce()' method to boil down the values in an array into any result, it does not only have to be the sum of everything inside the array. For example, we could use it to find the largest value in the array.
+
+// We can use the accumulator as a holder for our maximum value as seen in the block below. We set the maximumValue accumulator to an intial value of 0 in the argument after the curly braces.
+
+const maximum = movements2.reduce(function (maximumValue, value) {
+  if (value > maximumValue) {
+    maximumValue = value;
+  }
+  console.log(`Value is ${value}`);
+  console.log(`Maximum is ${maximumValue}`);
+  return maximumValue;
+}, 0);
+
+console.log(`Computed maximum is: ${maximum}`); // 3000
+
+// We can basically use '.reduce()' to perform any operation we want, the important thing is that the '.reduce()' method will take in an array and then boil it down to just one value.
+
+// .reduce() is a very useful method but can be a little difficult to use. Basically, we have to think what we want the accumulator and value arguments to do in our logic and then we should be able to use them in a correct manner.
+
+// NOTES
+// CHALLENGE 2
+// Going back to the study of dogs ages. Converting the dogs ages to human years, removing dos under 18, and then calculating the average human age for an array.
+
+function calcAverageHumanAge(dogAges) {
+  // Use the '.map()' method to generate a new Array with dog ages converted to human ages
+  const humanAges = dogAges
+    .map(dog => {
+      dog <= 2 ? (dog = 2 * dog) : (dog = 16 + 4 * dog);
+      return dog;
+    })
+    // Use the '.filter()' method to exclude all dogs under 18 human years old
+    .filter(current => current >= 18);
+
+  console.log(humanAges);
+
+  // Use the '.reduce()' method to sum up all of the ages and then divide by the arrays.length to get the average
+  const averageAdultDogAge =
+    humanAges.reduce((acc, age) => (acc += age)) / humanAges.length;
+
+  // We could also divide the values in an array by the arr.length directly within the method, leveraging the fact that we do have access to the whole array as the 4th argument of the .reduce() method. We have to specify an inital value of 0 to the accumulator for this to work, as otherwise it will use the first value in the array to do this and this will result in a potentially incorrect result.
+
+  // This second example is a possibility, but it universally panned as being needlessly hard to read.
+  // const averageAdultDogAge = humanAges.reduce(
+  //   (acc, age, i, arr) => acc + age / arr.length,
+  //   0
+  // );
+
+  return averageAdultDogAge;
+}
+
+const testData1 = [5, 2, 4, 1, 15, 8, 3];
+const testData2 = [16, 6, 10, 5, 6, 1, 4];
+
+console.log(calcAverageHumanAge(unifiedDogAges)); // 44
+console.log(calcAverageHumanAge(testData1)); // 44
+console.log(calcAverageHumanAge(testData2)); // 47.33...
+
+// NOTES
+// THE MAGIC OF CHAINING METHODS
+
+// By chaining methods together we can perform a lot of transformations all at once, this can be an extremely efficient way of writing code as it does not generate a load of variables that we need to keep track of. This is a sort of pipeline that processes our data in the manner of our choosing.
+const totalDepositsUSD = movements2
+  .filter(mov => mov > 0)
+  .map((move, i, arr) => {
+    console.log(arr);
+    return move * eurToUsd;
+  })
+  .reduce((acc, move, i, arr) => {
+    console.log(arr);
+    return acc + move;
+  });
+
+console.log(totalDepositsUSD.toFixed(2));
+
+// There can be reasability issues in some cases with chaining, so add notes if people might need clarification.
+
+// It can also be difficult to locate problems in the chain, so we can build the chain piece by piece with testing, or build in console.log statements every so often that we can use for debugging purposes in the case of a problem.
+
+// As these metods all get access to the whole array being iterated over, we can use this to log the array at certain points in the chain. It looks a little messy as done above, as it prints the array for every iteration of the method, but it can do the job in terms of debugging.
+
+// Be careful of which array we are actually looking at when we logging the arrays in this manner.
+
+// I applied chaining of methods in the populateTotals() function in the script.js, look at this function if you need an example of how it works.
+
+// I have now had to break up the chaining a little in the populateTotals() function. Before, amounts would not be properly generated if a movements array had no positives or no negatives as the '.reduce()' method will crash if it tries to iterate over an empty array. The lesson here is that chaining arrays is useful but not always appropriate. Sometimes error handling demands we break things into chunks where potential errors can be handled.
 
 // NOTES
