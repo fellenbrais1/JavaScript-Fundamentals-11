@@ -2,6 +2,8 @@
 // WORKING WITH ARRAYS
 // How and when to use arrays while building a visual banking app type project.
 
+// We are using objects and arrays in this app instead of maps as in real-world applications most data comes in from APIs in these formats.
+
 console.log(`Lecture script notes and code.`);
 
 // NOTES
@@ -249,6 +251,8 @@ console.log(`========================`);
 
 // containerMovements.innerHTML = '';
 
+// 'innerHTML' is similar to textContent, the difference is that textContext simply returns the text itself, but innerHTML returns everything including the HTML
+
 // NOTES
 // CHALLENGE 1
 // Create a function that takes in arrays of dog ages and then tells us whether the dog is a puppy or an adult.
@@ -377,4 +381,69 @@ console.log(movementsDescriptions);
 // COMPUTING USERNAMES
 // It would be easier to generate the user's alias programmatically, instead of typing in an 'alias' property manually.
 
-// Code for this section will be in the script.js file.
+// Code for this section will be in the script.js file in the 'CreatAliases()' function.
+
+// In this section I also added log in field behaviour in the case of incorrect inputs and other things related to logging in.
+
+// NOTES
+// THE FILTER METHOD
+
+// I wrote this code to filter out certain transactions from the movements array (positive and negative) and then chained that to a reduce method to generate a total.
+
+// function populateTotals(movements, interest, baseCurrency) {
+//   // Calculate the total amount incoming
+//   const inTotal = movements
+//     .filter(move => move > 0)
+//     .reduce((acc, value) => acc + value);
+
+//   // Calculate the total amount outgoing
+//   const outTotal = movements
+//     .filter(move => move < 0)
+//     .reduce((acc, value) => acc + value);
+
+//   // Calculate the amount of interest
+//   const interestTotal =
+//     movements.reduce(
+//       (accumulator, currentValue) => accumulator + currentValue
+//     ) *
+//     (interest / 100);
+
+//   // Update the HTML content with these totals
+//   labelSumIn.textContent = `${inTotal}${baseCurrency}`;
+//   labelSumOut.textContent = `${outTotal}${baseCurrency}`;
+//   labelSumInterest.textContent = `${interestTotal}${baseCurrency}`;
+// }
+
+// It is easier to do this using the '.filter()' and '.reduce()' methods as they can easily be chained together, we could not do this so easily by using multiple for of blocks.
+
+// NOTES
+// THE REDUCE METHOD
+
+// See the code above to see an example of using the '.reduce()' method on an array.
+
+// When using the '.reduce()' method take note that the first argument is always the accumulator, followed by the current value. These are usually the only values we need to access when using the '.reduce()' method. The other two arguments following can be the current index value, and then the total array to be iterated over.
+
+// There is also another argument we can feed into the .reduce() method, which is the inital value of the accumulator. We can specify this at the end of the statement after the curly braces and before the closing parentheses as seen below.
+
+// The intial value of the accumulator is set to 0, this is the default value, so even if this extra argument is not specified this would still happen.
+const testBalance = movements2.reduce(function (acc, cur, i, arr) {
+  console.log(`Iteration: ${i}: ${acc}`);
+  return acc + cur;
+}, 0);
+console.log(testBalance);
+
+// In this case the initial value of accumulator will start at 100 using the extra argument at the end of the logic.
+const testBalance2 = movements2.reduce(function (acc, cur, i, arr) {
+  console.log(`Iteration: ${i}: ${acc}`);
+  return acc + cur;
+}, 100);
+console.log(testBalance2);
+
+// If we tried to do the same thing with a for of loop, the accumulator would have to be a variable created externally that we would set up manually.
+let balance2 = 0;
+for (const move of movements2) balance2 += move;
+console.log(balance2);
+
+// As we don't need to go to the trouble of setting up an external accumulator, using the '.reduce()' method can be a lot easier than using for of loops.
+
+// NOTES
