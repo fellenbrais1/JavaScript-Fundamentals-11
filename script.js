@@ -8,6 +8,7 @@ console.log(`Project code.`);
 
 // Data
 const account1 = {
+  id: 'account1',
   owner: 'Jonas Schmedtmann',
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
@@ -16,6 +17,7 @@ const account1 = {
 };
 
 const account2 = {
+  id: 'account2',
   owner: 'Jessica Davis',
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
@@ -24,6 +26,7 @@ const account2 = {
 };
 
 const account3 = {
+  id: 'account3',
   owner: 'Steven Thomas Williams',
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
@@ -33,6 +36,7 @@ const account3 = {
 
 // Test of no negative values at all
 const account4 = {
+  id: 'account4',
   owner: 'Sarah Smith',
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
@@ -41,6 +45,7 @@ const account4 = {
 };
 
 const account5 = {
+  id: 'account5',
   owner: 'Michael McCann',
   movements: [800, 1650, -710, 990, -10],
   interestRate: 2.5,
@@ -50,6 +55,7 @@ const account5 = {
 
 // Test of no positive values at all
 const account6 = {
+  id: 'account6',
   owner: 'James Raynor',
   movements: [-8, -160, -10, -300, -15],
   interestRate: 1.5,
@@ -59,6 +65,7 @@ const account6 = {
 
 // Test of 0 balance
 const account7 = {
+  id: 'account7',
   owner: 'Sarah Kerrigan',
   movements: [-800, 800],
   interestRate: 1.5,
@@ -68,10 +75,21 @@ const account7 = {
 
 // Test of decimal amounts in movements
 const account8 = {
+  id: 'account8',
   owner: 'Arcturus Mengsk',
   movements: [-100.5, 80030.75, 2450.99, 881.18, -1043.68],
   interestRate: 1.5,
   pin: 8888,
+  baseCurrency: '$',
+};
+
+// Test of completely empty movements array
+const account9 = {
+  id: 'account9',
+  owner: 'Samir Duran',
+  movements: [],
+  interestRate: 1.5,
+  pin: 9999,
   baseCurrency: '$',
 };
 
@@ -84,6 +102,7 @@ const accounts = [
   account6,
   account7,
   account8,
+  account9,
 ];
 
 // Elements
@@ -173,6 +192,7 @@ function logInCheck(user, pin) {
     const checkResult = pinCheck(matchAccount, pin);
     if (checkResult === false) {
       logOut('invalidPIN');
+      return;
     }
     logInController(matchAccount);
     return;
@@ -245,9 +265,14 @@ function populateMovements(movements, baseCurrency) {
 // Populates the balance fields of the page
 // Called by logInController()
 function populateBalance(movements, baseCurrency) {
-  const balanceTotal = movements.reduce((accumulator, currentValue) => {
-    return accumulator + currentValue;
-  });
+  let balanceTotal;
+  if (movements.length === 0) {
+    balanceTotal = 0.0;
+  } else {
+    balanceTotal = movements.reduce((accumulator, currentValue) => {
+      return accumulator + currentValue;
+    });
+  }
 
   const time = generateTimestamp();
   const currencyString = formatCurrencyString(balanceTotal, baseCurrency);
@@ -518,3 +543,40 @@ const movementsDescriptions = movements.map(
       move > 0 ? 'deposited' : 'withdrew'
     } ${Math.abs(move)}`
 );
+
+function createNewAccount() {
+  const owner = prompt(
+    'Enter at least your first and last names separated by a space.'
+  );
+  const movements = [];
+  const interestRate = 1.5;
+  const pin = Number(prompt(`Please enter your 4 digit PIN number.`));
+  const baseCurrency = '$';
+
+  const accountNumbers = accounts.map(account =>
+    parseInt(account.id.replace('account', ''))
+  );
+
+  const highestNumber = Math.max(...accountNumbers);
+
+  const nextAccountId = `account${highestNumber + 1}`;
+
+  const protoAccount = {
+    id: nextAccountId,
+    owner: owner,
+    movements: movements,
+    interestRate: interestRate, // %
+    pin: pin,
+    baseCurrency: baseCurrency,
+  };
+
+  const accountVariableName = `account${highestNumber + 1}`;
+  eval(`const ${accountVariableName} = protoAccount;`);
+
+  accounts.push(protoAccount);
+  createAliases(accounts);
+
+  return protoAccount;
+}
+
+// createNewAccount();
