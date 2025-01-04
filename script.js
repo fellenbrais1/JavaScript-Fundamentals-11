@@ -142,6 +142,7 @@ const currencies = new Map([
 
 // Used to dictate error messages based on being logged in or not
 let loggedIn = false;
+let activeAccount = null;
 
 // Used with the timers to enable resets
 let intervalId;
@@ -149,12 +150,12 @@ let intervalId;
 /////////////////////////////////////////////////
 // FUNCTIONS IN ROUGH ORDER OF CALL
 
-// Programatically generates aliases for each account based on the first letters of each name in their owner property.
+// Programatically generates usernames for each account based on the first letters of each name in their owner property.
 // Called automatically()
-function createAliases(accounts) {
+function createUsernames(accounts) {
   accounts.forEach(
     account =>
-      (account.alias = account.owner
+      (account.username = account.owner
         .toLowerCase()
         .split(' ')
         .map(current => current.slice(0, 1))
@@ -184,7 +185,7 @@ function logInCheck(user, pin) {
   let lowercaseUser = user.toLowerCase();
 
   const matchAccount = accounts.find(
-    account => account.alias === lowercaseUser
+    account => account.username === lowercaseUser
   );
   console.log(matchAccount);
   if (matchAccount !== 'undefined') {
@@ -219,6 +220,8 @@ function logInController(account) {
   containerApp.style.opacity = 1;
   // Set the loggedIn flag to true
   loggedIn = true;
+  // Retrieve the object for the currently active account and assign it
+  activeAccount = setActiveAccount(account);
   // Populate page fields with relevant data
   populateWelcome(account.owner);
   populateMovements(account.movements, account.baseCurrency);
@@ -228,6 +231,13 @@ function logInController(account) {
 
   // Clear details from the login fields
   clearCredentials();
+}
+
+// Retreives the object for the currently active account and assigns it to a variable to be used in other functions
+// Called by logInController()
+function setActiveAccount(account) {
+  const setAccount = account;
+  return setAccount;
 }
 
 // Updates contents of the pages welcome field
@@ -469,10 +479,155 @@ function countdownFormatter(timerInSeconds) {
   return `${formattedMinutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
+// Calls the accountTransfer function with the activeAccount as an argument
+// Called by eventHandler on the 'Transfer money' button
+function accountTransferInit() {
+  accountTransfer(activeAccount);
+}
+
+// Allows transfer of funds between accounts when supplying valid usernames and amounts, causes balance, movements, and totals to be recaluclated. Transfers that push balance into negative not allowed yet - CHANGES NOT YET PERSISTENT BETWEEN SESSIONS
+// Called by accountTransferInit()
+function accountTransfer(activeAccount) {
+  // Captures the values from the form's fields
+  const address = inputTransferTo.value;
+  const amount = Number(inputTransferAmount.value);
+
+  let activeAccountBalance;
+
+  // Calculates the activeAccount's current balance to avoid illegal transfers
+  if (activeAccount.movements.length === 0) {
+    activeAccountBalance = 0.0;
+  } else {
+    activeAccountBalance = activeAccount.movements.reduce(
+      (accumulator, currentValue) => {
+        return accumulator + currentValue;
+      }
+    );
+  }
+
+  // Detects if the transfer is of a legal amount or not
+  if (amount > activeAccountBalance) {
+    alert(
+      `Cannot move specified amount as it exceeds the active account's balance. ${amount.toFixed(
+        2
+      )} / ${activeAccountBalance.toFixed(2)}`
+    );
+    clearInputFields();
+    return;
+  }
+
+  // Checks if both values needed have been specified or not
+  if (address !== '' && amount !== 0) {
+    // Finds the object for the specified sendToAccount
+    const sendToAccount = findAccount(address.toLowerCase());
+
+    // Checks if a valid account was found to send to
+    if (sendToAccount) {
+      const moneyOut = amount - amount * 2;
+      activeAccount.movements.push(moneyOut);
+
+      const sentMoney = amount;
+      sendToAccount.movements.push(sentMoney);
+      alert(
+        `Transfer successful! ${amount.toFixed(
+          2
+        )} moved to account '${address}'`
+      );
+
+      // Recalculate balance, movements, and totals
+      populateBalance(activeAccount.movements, activeAccount.baseCurrency);
+      populateMovements(activeAccount.movements, activeAccount.baseCurrency);
+      populateTotals(
+        activeAccount.movements,
+        activeAccount.interestRate,
+        activeAccount.baseCurrency
+      );
+      clearInputFields();
+      return;
+    } else {
+      alert(
+        `Transfer account specified ('${address}'} not found, cancelling process.`
+      );
+      clearInputFields();
+      return;
+    }
+  } else {
+    alert(
+      `Please enter an account username to send funds to, and the amount to send.`
+    );
+    clearInputFields();
+    return;
+  }
+}
+
+// Finds the account a user wants to transfer funds to and returns that accounts object
+// Called by accountTransfer()
+function findAccount(username) {
+  const matchAccount = accounts.find(account => account.username === username);
+  console.log(matchAccount);
+  if (matchAccount !== 'undefined') {
+    return matchAccount;
+  } else {
+    return;
+  }
+}
+
+// Clears the input fields for the operations on the right hand side of the page
+// Called by accountTransfer()
+function clearInputFields() {
+  inputTransferTo.value = '';
+  inputTransferAmount.value = '';
+  inputLoanAmount.value = '';
+  inputCloseUsername.value = '';
+  inputClosePin.value = '';
+}
+
+// Calls requestLoan() with the activeAccount as an argument
+// Called by an eventHandler on the 'Request loan' button
+function requestLoanInit() {
+  requestLoan(activeAccount);
+}
+
+// Allows a user to request a loan for a specified amount, then adding the amount to their balance and recalculating balance, movements, and totals - NEGATIVE LOANS NOT ALLOWED
+function requestLoan(activeAccount) {
+  // Captures the amount from the relevant field
+  const amount = Number(inputLoanAmount.value);
+
+  // Fails if the amount is 0 or has no number specified by the user
+  if (amount === 0) {
+    alert('Please specify an amount you would like to request a loan for.');
+    clearInputFields();
+    return;
+  }
+
+  // Allows processing of loan and relevant procedures of the amount is more than 0 - ALL LOANS ARE APPROVED CURRENTLY
+  if (amount > 0) {
+    setTimeout(() => {
+      alert(`Loan of ${amount} approved!`);
+      activeAccount.movements.push(amount);
+      populateBalance(activeAccount.movements, activeAccount.baseCurrency);
+      populateMovements(activeAccount.movements, activeAccount.baseCurrency);
+      populateTotals(
+        activeAccount.movements,
+        activeAccount.interestRate,
+        activeAccount.baseCurrency
+      );
+      clearInputFields();
+    }, 2000);
+    return;
+  } else {
+    // Fails if an amount less than 0 is specified
+    alert(`You cannot request a negative loan!`);
+    clearInputFields();
+    return;
+  }
+}
+
 // Logs the user out when their session timer has expired and handles logout operations
 // Called by timerCountdown()
 function logOut(reason) {
   containerApp.style.opacity = 0;
+  activeAccount = null;
   resetWelcome();
   timerCountdown('reset');
   clearCredentials();
@@ -520,13 +675,19 @@ function logOut(reason) {
 }
 
 // AUTOMATICALLY RUNNING CODE
-createAliases(accounts);
+createUsernames(accounts);
 
-// This code prevents the log in button from refreshing the page on click, which is a button inside a form's default behaviour. This was causing issues, so I have disabled it.
-document;
+// This code prevents the log in button from refreshing the page on click, which is a button inside a form's default behaviour. This was causing issues, so I have disabled it
 btnLogin.addEventListener('click', event => event.preventDefault());
-
 btnLogin.addEventListener('click', clickLogIn);
+
+// The same for the 'Transfer money' button
+btnTransfer.addEventListener('click', event => event.preventDefault());
+btnTransfer.addEventListener('click', accountTransferInit);
+
+// And for the 'Request loan' button
+btnLoan.addEventListener('click', event => event.preventDefault());
+btnLoan.addEventListener('click', requestLoanInit);
 
 // EXPERIMENTAL CODE SNIPPETS
 
@@ -574,7 +735,7 @@ function createNewAccount() {
   eval(`const ${accountVariableName} = protoAccount;`);
 
   accounts.push(protoAccount);
-  createAliases(accounts);
+  createUsernames(accounts);
 
   return protoAccount;
 }

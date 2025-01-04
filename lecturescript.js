@@ -575,3 +575,32 @@ console.log(firstDeposit);
 
 // NOTES
 // IMPLEMENTING LOGIN
+
+// In the case of a form's enter button, it automatically creates a click event when activated which is intended to send data server-side as default. In this particular application that doesn't work for us, as we want to run a function from the click event instead.
+
+// As discovered earlier, a button press in a form automatically refreshes the page as its default behaviour, so we need to add an eventHandler that stops any default behaviour from being carried out. (If we need to, sometimes this behaviour is appropriate.)
+
+// btnLogin.addEventListener('click', event => event.preventDefault());
+// btnLogin.addEventListener('click', clickLogIn);
+
+// However, as an alternative we can simply change the default behaviour of the form submit button by specifying the 'onsubmit' property of the form element. Here, we can specifiy code to be run on the the submit event, like so.
+
+{
+  /* <form class="login" onsubmit="clickLogIn();">
+      <input
+        type="text"
+        placeholder="user"
+        class="login__input login__input--user"
+      />
+      <!-- In practice, use type="password" -->
+      <input
+        type="text"
+        placeholder="PIN"
+        maxlength="4"
+        class="login__input login__input--pin"
+      />
+      <button class="login__btn">&rarr;</button>
+    </form> */
+}
+
+// In this case, the clickLogIn() function has been bound to the 'onsubmit' property of the form, that means when the submit button is clicked this code will be run instead of the default operation. This is now the behaviour we want, and it is simpler to add one line of code here, than to write two eventHanlder statements as before, one to disable the default behaviour, and on to then add a new eventHandler that we want.
