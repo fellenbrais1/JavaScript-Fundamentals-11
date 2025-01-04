@@ -230,7 +230,7 @@ function logInController(account) {
   timerCountdown();
 
   // Clear details from the login fields
-  clearCredentials();
+  clearInputFields();
 }
 
 // Retreives the object for the currently active account and assigns it to a variable to be used in other functions
@@ -429,13 +429,6 @@ function resetWelcome() {
   }, 1000);
 }
 
-// Clears log in information from the login fieldsof the page
-// Called by logInCheck(), clickLogIn(), logInController()
-function clearCredentials() {
-  inputLoginUsername.value = '';
-  inputLoginPin.value = '';
-}
-
 // Creates a 5 minute timed session for the user on login, will log the user out when the timer expires
 // Called by logInController(),
 function timerCountdown(clear = false) {
@@ -477,6 +470,18 @@ function countdownFormatter(timerInSeconds) {
   const formattedMinutes = minutes === 0 ? '0' : minutes.toString();
 
   return `${formattedMinutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+// Clears all input fields on the page
+// Called by logInController(), accountTransfer(), requestLoan(), and logOut()
+function clearInputFields() {
+  inputLoginUsername.value = '';
+  inputLoginPin.value = '';
+  inputTransferTo.value = '';
+  inputTransferAmount.value = '';
+  inputLoanAmount.value = '';
+  inputCloseUsername.value = '';
+  inputClosePin.value = '';
 }
 
 // Calls the accountTransfer function with the activeAccount as an argument
@@ -572,16 +577,6 @@ function findAccount(username) {
   }
 }
 
-// Clears the input fields for the operations on the right hand side of the page
-// Called by accountTransfer()
-function clearInputFields() {
-  inputTransferTo.value = '';
-  inputTransferAmount.value = '';
-  inputLoanAmount.value = '';
-  inputCloseUsername.value = '';
-  inputClosePin.value = '';
-}
-
 // Calls requestLoan() with the activeAccount as an argument
 // Called by an eventHandler on the 'Request loan' button
 function requestLoanInit() {
@@ -630,7 +625,7 @@ function logOut(reason) {
   activeAccount = null;
   resetWelcome();
   timerCountdown('reset');
-  clearCredentials();
+  clearInputFields();
   let alertMessage;
   switch (reason) {
     case 'expired':
