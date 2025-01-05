@@ -605,4 +605,9 @@ console.log(firstDeposit);
 
 // In this case, the clickLogIn() function has been bound to the 'onsubmit' property of the form, that means when the submit button is clicked this code will be run instead of the default operation. This is now the behaviour we want, and it is simpler to add one line of code here, than to write two eventHanlder statements as before, one to disable the default behaviour, and on to then add a new eventHandler that we want.
 
+// If we want to remove the focus from an HTML element we can call it (having first assigned it to a variable) with .blur()
+
+// btnClose.blur();
+
 // NOTES
+// IMPLEMENTING TRANSFERS

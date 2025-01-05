@@ -3,10 +3,14 @@
 console.log(`Project code.`);
 
 /////////////////////////////////////////////////
-/////////////////////////////////////////////////
 // BANKIST APP
 
-// Data
+/////////////////////////////////////////////////
+// START OF CODE
+
+/////////////////////////////////////////////////
+// DATA
+
 const account1 = {
   id: 'account1',
   owner: 'Jonas Schmedtmann',
@@ -93,7 +97,7 @@ const account9 = {
   baseCurrency: '$',
 };
 
-const accounts = [
+let accounts = [
   account1,
   account2,
   account3,
@@ -105,7 +109,9 @@ const accounts = [
   account9,
 ];
 
-// Elements
+/////////////////////////////////////////////////
+// ELEMENTS
+
 const labelWelcome = document.querySelector('.welcome');
 const labelBalance = document.querySelector('.balance');
 const labelSumIn = document.querySelector('.summary__value--in');
@@ -131,8 +137,7 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 /////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
+// BASE VARIABLES
 
 const currencies = new Map([
   ['USD', 'United States dollar'],
@@ -150,7 +155,7 @@ let intervalId;
 /////////////////////////////////////////////////
 // FUNCTIONS IN ROUGH ORDER OF CALL
 
-// Programatically generates usernames for each account based on the first letters of each name in their owner property.
+// Programatically generates usernames for each account based on the first letters of each name in their owner property
 // Called automatically()
 function createUsernames(accounts) {
   accounts.forEach(
@@ -163,7 +168,7 @@ function createUsernames(accounts) {
   );
 }
 
-// Gathers the values inside the input fields for login and then calls the logInCheck() function.
+// Gathers the values inside the input fields for login and then calls the logInCheck() function
 // Run when login button is clicked via event handler
 function clickLogIn() {
   // To reset any timers
@@ -178,18 +183,16 @@ function clickLogIn() {
   logInCheck(usernameInput, pinInput);
 }
 
-// Checks to see if the typed in username corresponds to an account, then runs the pinCheck() function to see if the PIN number mathces, before granting access.
+// Checks to see if the typed in username corresponds to an account, then runs the pinCheck() function to see if the PIN number mathces, before granting access
 // Called by clickLogIn()
 function logInCheck(user, pin) {
-  let foundMatch = false;
   let lowercaseUser = user.toLowerCase();
 
   const matchAccount = accounts.find(
     account => account.username === lowercaseUser
   );
   console.log(matchAccount);
-  if (matchAccount !== 'undefined') {
-    foundMatch = true;
+  if (matchAccount !== undefined) {
     const checkResult = pinCheck(matchAccount, pin);
     if (checkResult === false) {
       logOut('invalidPIN');
@@ -197,13 +200,13 @@ function logInCheck(user, pin) {
     }
     logInController(matchAccount);
     return;
-  }
-  if (!foundMatch) {
+  } else {
     logOut('nomatch');
+    return;
   }
 }
 
-// Ccheck that the PIN number is correct on a user log-in attempt.
+// Ccheck that the PIN number is correct on a user log-in attempt
 // Called by logInCheck()
 function pinCheck(account, pin) {
   if (pin === account.pin) {
@@ -300,7 +303,7 @@ function populateBalance(movements, baseCurrency) {
 }
 
 // Formats the currency strings when amounts need to be displayed, based on the baseCurrency of the account
-// Called by populateMovements(), populateBalance(), populateTotals()
+// Called by populateMovements(), populateBalance(), populateTotals(), accountTransfer(), requestLoan()
 function formatCurrencyString(amount, baseCurrency, additional = null) {
   // Math.abs() returns an unsigned integer we can use if we need to
   let unsignedAmount = Math.abs(amount);
@@ -342,7 +345,7 @@ function formatCurrencyString(amount, baseCurrency, additional = null) {
   return currencyString;
 }
 
-// Calculates totals and updates the HTML of fields at the bottom of the page.
+// Calculates totals and updates the HTML of fields at the bottom of the page
 // Called by logInController()
 function populateTotals(movements, interest, baseCurrency) {
   // Calculate the total amount incoming
@@ -430,7 +433,7 @@ function resetWelcome() {
 }
 
 // Creates a 5 minute timed session for the user on login, will log the user out when the timer expires
-// Called by logInController(),
+// Called by clickLogIn(), logInController(), logOut()
 function timerCountdown(clear = false) {
   // Clears any existing timer if the function is called with a 'reset' command as an argument
   if (clear) {
@@ -473,7 +476,7 @@ function countdownFormatter(timerInSeconds) {
 }
 
 // Clears all input fields on the page
-// Called by logInController(), accountTransfer(), requestLoan(), and logOut()
+// Called by logInController(), accountTransfer(), requestLoan(), logOut()
 function clearInputFields() {
   inputLoginUsername.value = '';
   inputLoginPin.value = '';
@@ -490,32 +493,37 @@ function accountTransferInit() {
   accountTransfer(activeAccount);
 }
 
-// Allows transfer of funds between accounts when supplying valid usernames and amounts, causes balance, movements, and totals to be recaluclated. Transfers that push balance into negative not allowed yet - CHANGES NOT YET PERSISTENT BETWEEN SESSIONS
+// TODO
+// ALLOW TRANSFERS THAT CAN PUSH A BALANCE INTO NEGATIVE?
+// MAKE CHANGES PERSISTENT BETWEEN SESSIONS
+
+// Allows transfer of funds between accounts when supplying valid usernames and amounts, causes balance, movements, and totals to be recaluclated. Cannoy transfer more than you have
 // Called by accountTransferInit()
 function accountTransfer(activeAccount) {
   // Captures the values from the form's fields
   const address = inputTransferTo.value;
   const amount = Number(inputTransferAmount.value);
 
-  let activeAccountBalance;
-
   // Calculates the activeAccount's current balance to avoid illegal transfers
-  if (activeAccount.movements.length === 0) {
-    activeAccountBalance = 0.0;
-  } else {
-    activeAccountBalance = activeAccount.movements.reduce(
-      (accumulator, currentValue) => {
-        return accumulator + currentValue;
-      }
-    );
-  }
+  const activeAccountBalance = calculateActiveBalance(activeAccount);
+
+  const currencyStringAmount = formatCurrencyString(
+    amount,
+    activeAccount.baseCurrency
+  );
+
+  const currencyStringBalance = formatCurrencyString(
+    activeAccountBalance,
+    activeAccount.baseCurrency
+  );
+
+  console.log(currencyStringAmount);
+  console.log(currencyStringBalance);
 
   // Detects if the transfer is of a legal amount or not
   if (amount > activeAccountBalance) {
     alert(
-      `Cannot move specified amount as it exceeds the active account's balance. ${amount.toFixed(
-        2
-      )} / ${activeAccountBalance.toFixed(2)}`
+      `Cannot move specified amount as it exceeds the active account's balance. ${currencyStringAmount} / ${currencyStringBalance}`
     );
     clearInputFields();
     return;
@@ -534,9 +542,7 @@ function accountTransfer(activeAccount) {
       const sentMoney = amount;
       sendToAccount.movements.push(sentMoney);
       alert(
-        `Transfer successful! ${amount.toFixed(
-          2
-        )} moved to account '${address}'`
+        `Transfer successful! ${currencyStringAmount} moved to account '${address}'`
       );
 
       // Recalculate balance, movements, and totals
@@ -570,11 +576,28 @@ function accountTransfer(activeAccount) {
 function findAccount(username) {
   const matchAccount = accounts.find(account => account.username === username);
   console.log(matchAccount);
-  if (matchAccount !== 'undefined') {
+  if (matchAccount !== undefined) {
     return matchAccount;
   } else {
     return;
   }
+}
+
+// Calculates and returns the balance of the activeAccount when needed
+// Called by accountTransfer(), requestLoan()
+function calculateActiveBalance(activeAccount) {
+  let activeAccountBalance;
+
+  if (activeAccount.movements.length === 0) {
+    activeAccountBalance = 0.0;
+  } else {
+    activeAccountBalance = activeAccount.movements.reduce(
+      (accumulator, currentValue) => {
+        return accumulator + currentValue;
+      }
+    );
+  }
+  return activeAccountBalance;
 }
 
 // Calls requestLoan() with the activeAccount as an argument
@@ -583,7 +606,7 @@ function requestLoanInit() {
   requestLoan(activeAccount);
 }
 
-// Allows a user to request a loan for a specified amount, then adding the amount to their balance and recalculating balance, movements, and totals - NEGATIVE LOANS NOT ALLOWED
+// Allows a user to request a loan for a specified amount, then adding the amount to their balance and recalculating balance, movements, and totals. Negative loans are not allowed
 function requestLoan(activeAccount) {
   // Captures the amount from the relevant field
   const amount = Number(inputLoanAmount.value);
@@ -595,21 +618,45 @@ function requestLoan(activeAccount) {
     return;
   }
 
-  // Allows processing of loan and relevant procedures of the amount is more than 0 - ALL LOANS ARE APPROVED CURRENTLY
+  // Allows processing of loan and relevant procedures of the amount is more than 0 and the user's balance has at least 10% of the loan's value as a deposit
   if (amount > 0) {
-    setTimeout(() => {
-      alert(`Loan of ${amount} approved!`);
-      activeAccount.movements.push(amount);
-      populateBalance(activeAccount.movements, activeAccount.baseCurrency);
-      populateMovements(activeAccount.movements, activeAccount.baseCurrency);
-      populateTotals(
-        activeAccount.movements,
-        activeAccount.interestRate,
-        activeAccount.baseCurrency
-      );
-      clearInputFields();
-    }, 2000);
-    return;
+    const depositNeeded = amount / 10;
+    const activeAccountBalance = calculateActiveBalance(activeAccount);
+    if (activeAccountBalance >= depositNeeded) {
+      setTimeout(() => {
+        const currencyString = formatCurrencyString(
+          amount,
+          activeAccount.baseCurrency
+        );
+        alert(`Loan of ${currencyString} approved!`);
+        activeAccount.movements.push(amount);
+        populateBalance(activeAccount.movements, activeAccount.baseCurrency);
+        populateMovements(activeAccount.movements, activeAccount.baseCurrency);
+        populateTotals(
+          activeAccount.movements,
+          activeAccount.interestRate,
+          activeAccount.baseCurrency
+        );
+        clearInputFields();
+      }, 2000);
+      return;
+    } else {
+      setTimeout(() => {
+        const currencyStringAmount = formatCurrencyString(
+          amount,
+          activeAccount.baseCurrency
+        );
+        const currencyStringDeposit = formatCurrencyString(
+          depositNeeded,
+          activeAccount.baseCurrency
+        );
+        alert(
+          `Loan of ${currencyStringAmount} declined! Your account must have a balance equal to, or over 10% of the loan amount (${currencyStringDeposit}).`
+        );
+        clearInputFields();
+      }, 2000);
+      return;
+    }
   } else {
     // Fails if an amount less than 0 is specified
     alert(`You cannot request a negative loan!`);
@@ -618,8 +665,109 @@ function requestLoan(activeAccount) {
   }
 }
 
+// Calls closeAccount() with the username and pin specified, as well as the currently activeAccount's object
+// Called by eventHandler on the 'Close account' button
+function closeAccountInit() {
+  const username = inputCloseUsername.value;
+  const pin = Number(inputClosePin.value);
+  closeAccount(username, pin, activeAccount);
+}
+
+// Allows a user to close their account when re-confirming their username and PIN, will fail if credentials are not correct or trying to close a different account
+// Called by closeAccountInit()
+function closeAccount(username, pin, activeAccount) {
+  const accountToClose = findAccount(username);
+
+  if (username === '' || pin === 0) {
+    alert(`Please enter both username and PIN to proceed.`);
+    clearInputFields();
+    return;
+  }
+
+  if (accountToClose) {
+    if (accountToClose === activeAccount) {
+      const checkResult = pinCheck(activeAccount, pin);
+      if (checkResult === false) {
+        alert('Wrong PIN specified, cancelling process.');
+        clearInputFields();
+        return;
+      } else {
+        accounts = modifyAccountsArray(accountToClose);
+        logOut('closeaccount');
+        return;
+      }
+    } else {
+      alert('You can only close your own account, cancelling process.');
+      clearInputFields();
+      return;
+    }
+  } else {
+    alert(`No account found to close, cancelling process.`);
+    clearInputFields();
+    return;
+  }
+}
+
+// Deletes an account from the accounts array when an account is closed
+// Called by closeAccount()
+function modifyAccountsArray(accountToClose) {
+  const newAccounts = accounts.filter(
+    current => current.username !== accountToClose.username
+  );
+  return newAccounts;
+}
+
+// Allows user to sort their movements into similar groupings of positive and then negative amounts
+// Called by eventHandler on the 'Sort' button
+function sortMovementsInit() {
+  sortMovements(activeAccount);
+}
+
+// TODO
+// NEED TO ALLOW SORTING WITHOUT DISTURBING NUMBERING SCHEME
+// NEED TO ADD SUPPORT FOR DIFFERENT TYPES OF SORTS
+
+// Sorts user movements into positive and then negative groupings
+// Called by sortMovementsInit()
+function sortMovements(activeAccount) {
+  // This expression clears all HTML out of the element to make it empty
+  containerMovements.innerHTML = '';
+
+  const sortedMovements = activeAccount.movements.sort((a, b) => {
+    if (a < 0 && b >= 0) {
+      return -1;
+    } else if (a >= 0 && b < 0) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  // Iterate through the movements and add their amount and index number to some HTML in a string literal along with types and times etc.
+  sortedMovements.forEach(function (amount, index) {
+    const type = amount > 0 ? 'deposit' : 'withdrawal';
+    const time = generateTimestamp();
+
+    const currencyString = formatCurrencyString(
+      amount,
+      activeAccount.baseCurrency
+    );
+    // Create the HTML that we need in a string literal
+    const html = `<div class="movements__row">
+      <div class="movements__type movements__type--${type}">${
+      index + 1
+    } ${type}</div>
+      <div class="movements__date">${time}</div>
+      <div class="movements__value">${currencyString}</div>
+      </div>`;
+
+    // Add the above HTML to the element
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+}
+
 // Logs the user out when their session timer has expired and handles logout operations
-// Called by timerCountdown()
+// Called by clickLogIn(), logInCheck(), timerCountdown(), closeAccount()
 function logOut(reason) {
   containerApp.style.opacity = 0;
   activeAccount = null;
@@ -659,6 +807,9 @@ function logOut(reason) {
         alertMessage = `That username does not correspond to any user on record - Non-existant username.`;
         break;
       }
+    case 'closeaccount':
+      alertMessage = `This account has been closed and you will be logged out - Account closed`;
+      break;
     default:
       break;
   }
@@ -669,8 +820,13 @@ function logOut(reason) {
   }, 1000);
 }
 
+/////////////////////////////////////////////////
 // AUTOMATICALLY RUNNING CODE
+
 createUsernames(accounts);
+
+/////////////////////////////////////////////////
+// EVENT HANDLERS
 
 // This code prevents the log in button from refreshing the page on click, which is a button inside a form's default behaviour. This was causing issues, so I have disabled it
 btnLogin.addEventListener('click', event => event.preventDefault());
@@ -684,6 +840,15 @@ btnTransfer.addEventListener('click', accountTransferInit);
 btnLoan.addEventListener('click', event => event.preventDefault());
 btnLoan.addEventListener('click', requestLoanInit);
 
+// And for the 'Close account button'
+btnClose.addEventListener('click', event => event.preventDefault());
+btnClose.addEventListener('click', closeAccountInit);
+
+// And finally, the 'Sort' button
+btnSort.addEventListener('click', event => event.preventDefault());
+btnSort.addEventListener('click', sortMovementsInit);
+
+/////////////////////////////////////////////////
 // EXPERIMENTAL CODE SNIPPETS
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
@@ -736,3 +901,6 @@ function createNewAccount() {
 }
 
 // createNewAccount();
+
+/////////////////////////////////////////////////
+// END OF CODE
