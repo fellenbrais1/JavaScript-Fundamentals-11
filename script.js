@@ -504,6 +504,12 @@ function accountTransfer(activeAccount) {
   const address = inputTransferTo.value;
   const amount = Number(inputTransferAmount.value);
 
+  if (address === activeAccount.username) {
+    alert(`Please specify a different account from your own to transfer to.`);
+    clearInputFields();
+    return;
+  }
+
   // Calculates the activeAccount's current balance to avoid illegal transfers
   const activeAccountBalance = calculateActiveBalance(activeAccount);
 
