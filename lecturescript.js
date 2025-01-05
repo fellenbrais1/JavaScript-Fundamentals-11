@@ -611,3 +611,13 @@ console.log(firstDeposit);
 
 // NOTES
 // IMPLEMENTING TRANSFERS
+
+// To change a positive value into a negative one we can simply use this syntax:
+
+// const moneyOut = -amount;
+
+// This is a lot simpler than:
+
+// const moneyOut = amount - (amount * 2);
+
+// We always need to think about how our code could be refactored in order to prevent repeating the same code. A prime example in my code would be the 'populate' functions. All three are always called together and with very similar arguments. They could be refactored into one function that can be called whenever it is needed.

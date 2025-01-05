@@ -227,9 +227,9 @@ function logInController(account) {
   activeAccount = setActiveAccount(account);
   // Populate page fields with relevant data
   populateWelcome(account.owner);
-  populateMovements(account.movements, account.baseCurrency);
-  populateBalance(account.movements, account.baseCurrency);
-  populateTotals(account.movements, account.interestRate, account.baseCurrency);
+  populateUI(account.movements, account.interestRate, account.baseCurrency);
+
+  // Set a timer for automatic logout
   timerCountdown();
 
   // Clear details from the login fields
@@ -249,8 +249,16 @@ function populateWelcome(owner) {
   labelWelcome.textContent = `Welcome, ${owner}!`;
 }
 
+// Calls the functions to populate the numerical based fields of the UI
+// Called by logInController(), accountTransfer(), requestLoan()
+function populateUI(movements, interestRate, baseCurrency) {
+  populateBalance(movements, baseCurrency);
+  populateMovements(movements, baseCurrency);
+  populateTotals(movements, interestRate, baseCurrency);
+}
+
 // Creates an HTML element to be populate the table of deposits and withdrawals on the page
-// Called by logInController()
+// Called by populateUI()
 function populateMovements(movements, baseCurrency) {
   // This expression clears all HTML out of the element to make it empty
   containerMovements.innerHTML = '';
@@ -276,7 +284,7 @@ function populateMovements(movements, baseCurrency) {
 }
 
 // Populates the balance fields of the page
-// Called by logInController()
+// Called by populateUI()
 function populateBalance(movements, baseCurrency) {
   let balanceTotal;
   if (movements.length === 0) {
@@ -346,7 +354,7 @@ function formatCurrencyString(amount, baseCurrency, additional = null) {
 }
 
 // Calculates totals and updates the HTML of fields at the bottom of the page
-// Called by logInController()
+// Called by populateUI()
 function populateTotals(movements, interest, baseCurrency) {
   // Calculate the total amount incoming
   const depositsArr = movements.filter(move => move > 0);
@@ -505,7 +513,9 @@ function accountTransfer(activeAccount) {
   const amount = Number(inputTransferAmount.value);
 
   if (address === activeAccount.username) {
-    alert(`Please specify a different account from your own to transfer to.`);
+    alert(
+      `Please specify a different account from your own to transfer to, cancelling process.`
+    );
     clearInputFields();
     return;
   }
@@ -542,7 +552,7 @@ function accountTransfer(activeAccount) {
 
     // Checks if a valid account was found to send to
     if (sendToAccount) {
-      const moneyOut = amount - amount * 2;
+      const moneyOut = -amount;
       activeAccount.movements.push(moneyOut);
 
       const sentMoney = amount;
@@ -552,9 +562,7 @@ function accountTransfer(activeAccount) {
       );
 
       // Recalculate balance, movements, and totals
-      populateBalance(activeAccount.movements, activeAccount.baseCurrency);
-      populateMovements(activeAccount.movements, activeAccount.baseCurrency);
-      populateTotals(
+      populateUI(
         activeAccount.movements,
         activeAccount.interestRate,
         activeAccount.baseCurrency
@@ -636,9 +644,7 @@ function requestLoan(activeAccount) {
         );
         alert(`Loan of ${currencyString} approved!`);
         activeAccount.movements.push(amount);
-        populateBalance(activeAccount.movements, activeAccount.baseCurrency);
-        populateMovements(activeAccount.movements, activeAccount.baseCurrency);
-        populateTotals(
+        populateUI(
           activeAccount.movements,
           activeAccount.interestRate,
           activeAccount.baseCurrency
