@@ -1061,3 +1061,328 @@ console.log(movements2); // [3000, 1300, 450, 200, 70, -400, -650]
 
 // NOTES
 // ARRAY GROUPING
+// Added in ES2024 a new feature called Array Grouping was added to JavaScript, this is a very powerful feature that allows us to group values within an array based on a specified condition.
+
+// Creating a copy of a previous array to work with.
+const movements4 = movements2;
+console.log(movements4);
+
+// We don't actually use a method to access array grouping, instead, we create a new object and use the method '.groupBy()' on that object.
+
+// This accepts two arguments, the array to be iterated over, and then a callback function where we specify our condition.
+
+// Because we want to group the elements into at least two groups, we can use the ternary operator to choose which group to put an element into. We specify a string for each choice and that will be the key of the array created for these elements.
+const groupedMovements = Object.groupBy(movements4, current =>
+  current > 0 ? 'deposits' : 'withdrawals'
+);
+
+// When we view the output we see that a new object has been created. This object has two properties, deposits and withdrawals, and these will be populated by an array of all the elements that fit the condition.
+console.log(groupedMovements);
+
+// We could then call these arrays by dot indexing the groupedMovements object, this can be very powerful for displaying and using only certain data within an array.
+console.log(groupedMovements.deposits);
+console.log(groupedMovements.withdrawals);
+
+// We could create any groups that we like with this method, for example we could divide the movements in array into large and small movements.
+const largeMovements = Object.groupBy(movements4, current =>
+  current >= 1000 ? 'large' : 'small'
+);
+console.log(largeMovements);
+console.log(largeMovements.large);
+console.log(largeMovements.small);
+
+// Or we could use it to place accounts into different categories based on their total balance. We can even put any experession we like to be evalutated by the callback function. In this case, I am running a .reduce() method inside the condition to get the balances of the accounts.
+const groupedAccounts = Object.groupBy(accounts2, current =>
+  current.movements.reduce(
+    (accumulator, currentValue) => accumulator + currentValue
+  ) > 2000
+    ? 'bigSpender'
+    : 'smallFry'
+);
+console.log(groupedAccounts);
+console.log(groupedAccounts.bigSpender);
+console.log(groupedAccounts.smallFry);
+
+// We can even place if conditions within the callback function, this is useful in cases where we want to create more than 2 groups from an array.
+const groupedAccounts2 = Object.groupBy(accounts2, current => {
+  const movementCount = current.movements.length;
+
+  if (movementCount >= 5) return 'veryActive';
+  if (movementCount >= 3) return 'moderatelyActive';
+  if (movementCount === 0) return 'notActive';
+});
+console.log(groupedAccounts2);
+
+// This could be useful in a banking app because we could put a property on each account saying what kind of account it is. Then we could group them using these values to group the accounts by type.
+
+// Creating new account objects with a 'type' property on them.
+const account4 = {
+  id: 'account1',
+  owner: 'Jonas Schmedtmann',
+  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+  interestRate: 1.2, // %
+  pin: 1111,
+  baseCurrency: '€',
+  type: 'premium',
+};
+
+const account5 = {
+  id: 'account2',
+  owner: 'Jessica Davis',
+  movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
+  interestRate: 1.5,
+  pin: 2222,
+  baseCurrency: '$',
+  type: 'saver',
+};
+
+const account6 = {
+  id: 'account3',
+  owner: 'Steven Thomas Williams',
+  movements: [200, -200, 340, -300, -20, 50, 400, -460],
+  interestRate: 0.7,
+  pin: 3333,
+  baseCurrency: '$',
+  type: 'federal',
+};
+
+// Creating a new array of these new objects.
+const accounts3 = [account4, account5, account6];
+console.log(accounts3);
+
+// Grouping the account objects based on the values of the 'type' property, the key names come directly from all of the options encountered in the type property across all accounts, so we don't need to manually specify anything.
+const groupedAccounts3 = Object.groupBy(accounts3, current => current.type);
+console.log(groupedAccounts3);
+
+// This is very useful but we have to watch out for typos in the type property, if the method encountered both 'premium' and 'premum' it wold create groups for each, even though this isn't really what we would want.
+
+// A common syntax we might see for this is to immediately destructure the type property from all of the array elements. This gets us the same result as the code above.
+const groupedAccounts4 = Object.groupBy(accounts3, ({ type }) => type);
+console.log(groupedAccounts4);
+
+// NOTES
+// MORE WAYS OF CREATING AND FILLING ARRAYS
+// We might want to programmatically create and fill arrays, we have been writing them literally up to this point.
+
+const arr2 = [1, 2, 3, 4, 5, 6, 7];
+console.log(new Array(1, 2, 3, 4, 5, 6, 7));
+
+// EMPTY ARRAY + FILL METHOD
+
+// We would think that this code below would generate an array with one value, '7'. however when we only pass one argument to the array constructor function it will create an array with 7 elements of no value.
+const x = new Array(7);
+const y = new Array(7);
+const z = new Array(7);
+console.log(x); // [empty * 7]
+
+// We can't really do anything with this empty array. But there is one way of making this array useful.
+
+// By using the '.fill()' method we can pass in a value to fill up the entire array with. This method will mutate the entire array, so as usual, be careful how we use it.
+
+x.fill(1);
+console.log(x); // [1, 1, 1, 1, 1, 1, 1]
+
+// The .fill() method can aslo be supplied with other arugments after the value, these are the start index positions and the end index position.
+
+// The start index is simple enough, a 3 means index position 3. But the end position is more complicated, it is up to and not including, so a value of 5 would stop after filling index position 4.
+
+y.fill(1, 3, 5); // Fill with value '1' start at index 3, end before index 5
+console.log(y); // [empty * 3, 1, 1, empty * 2]
+
+z.fill(23, 2, 6); // Fill with value '23' start at index 2, end before index 6
+console.log(z); // [empty * 2, 23, 23, 23, 23, empty]
+
+// We can overwrite previous values in an array using the .fill() method. This could either be used to fill in the remaining empty spaces in an array, or to overwrite previous values at the index positions specified.
+arr2.fill(23, 4, 6);
+console.log(arr2); // [1, 2, 3,4, 23, 23, 7]
+
+z.fill(42, 0, 2);
+console.log(z); // [42, 42, 23, 23, 23, 23, empty]
+
+// ARRAY.FROM FUNCTION
+
+// We can also create a new array programmatically using the 'Array.from()' function.
+
+// Here we are not using '.from()' as a method, because we are calling it on the Array constructor it acts as a function.
+const createdArray = Array.from({ length: 7 }, () => 1);
+console.log(createdArray); // [1, 1, 1, 1, 1, 1, 1]
+
+const createdArray2 = Array.from({ length: 7 }, (cur, i) => i + 1);
+console.log(createdArray2); // [1, 2, 3, 4, 5, 6, 7]
+
+// If we are not using one or more of the arguments for a function or callback function, we can denote this by replacing that argument with an underscore. The program knows that we aren't now using this argument, and other programmers will understand this too.
+const createdArray3 = Array.from({ length: 7 }, (_, i) => i + 1);
+console.log(createdArray3); // [1, 2, 3, 4, 5, 6, 7]
+
+// We could use this to generate an array of something programmatical, like 100 random dice rolls.
+
+function diceRoller100() {
+  const diceRollArray = Array.from({ length: 100 }, () =>
+    Math.round(Math.random(0, 1) * 5 + 1)
+  );
+  console.log(diceRollArray);
+
+  const groupedRolls = Object.groupBy(diceRollArray, current => current);
+  console.log(groupedRolls);
+
+  // Here, we can't dot index because the key names are also numbers, but we can use bracket indexing to do this.
+  console.log(groupedRolls[1]);
+  console.log(groupedRolls[2]);
+  console.log(groupedRolls[3]);
+  console.log(groupedRolls[4]);
+  console.log(groupedRolls[5]);
+  console.log(groupedRolls[6]);
+}
+
+diceRoller100();
+
+// An adaptation of the diceRoller100() function to change dice rolls into types of sushi.
+function sushiDiceRoller() {
+  const sushiArray = Array.from({ length: 100 }, () =>
+    Math.round(Math.random(0, 1) * 5 + 1)
+  );
+
+  const newSushiArray = sushiArray.map(element => {
+    switch (element) {
+      case 1:
+        return 'maki';
+      case 2:
+        return 'nigiri';
+      case 3:
+        return 'hamburg';
+      case 4:
+        return 'sashimi';
+      case 5:
+        return 'sperm';
+      case 6:
+        return 'eggs';
+      default:
+        return 'unknown';
+    }
+  });
+
+  console.log(newSushiArray);
+
+  const groupedNewSushi = Object.groupBy(newSushiArray, current => current);
+
+  console.log(groupedNewSushi);
+
+  console.log(groupedNewSushi.maki);
+  console.log(groupedNewSushi.nigiri);
+  console.log(groupedNewSushi.hamburg);
+  console.log(groupedNewSushi.sashimi);
+  console.log(groupedNewSushi.sperm);
+  console.log(groupedNewSushi.eggs);
+  console.log(groupedNewSushi.unknown);
+}
+
+sushiDiceRoller();
+
+// 'Array.from()' was initially introduced into JavaScript to create arrays from array-like structures than can't otherwise be converted into real arrays unlike maps, sets, etc.
+
+// When we use functions like 'querySelectorAll()', an array-like object is created which is a nodelist. We cannot call methods like '.map()' or '.reduce()' on them. To use these methods on the nodelist, we could use 'Array.from()' to convert it into a real array that we can then run methods on.
+
+// We might also have data on the webpage which is not really in the form of a real array yet. To be able to use this data, we could use 'Array.from()' to convert it from an array-like object to a real array object. Then we can work on this array.
+
+// We could take the nodelist of the below DOM element and then create an array with the values contained within.
+const movementsUI = Array.from(document.querySelectorAll('.movements__value'));
+console.log(movementsUI);
+
+// We could access this new array and get things like textContent from it, we could even do things like replace pieces of this data so we return the values that we want.
+
+// This .map() method converts the captured array from the step above and then converts the values to a format that we can work with more directly.
+console.log(
+  movementsUI.map(element =>
+    Number(element.textContent.replace('€', '').replace(' ', ''))
+  )
+); // [4000, 378]
+
+// We could use this to do things like get our balance total just by harvesting the data posted in the mvoements section of the webpage.
+
+// We probably wouldn't need to do something like this regularly, but it could be very useful in certain situations.
+
+// We could also use this method to create an array form the nodelist, but in this case, we would also have to run a '.map()' method separately to get the desired results we want.
+const movementsUI2 = [...document.querySelectorAll('.movements__value')];
+console.log(movementsUI2);
+
+// NOTES
+// NON-DESTRUCTIVE ALTERNATIVES: TOREVERSED, TOSORTED, TOSPLICED, WITH
+
+// Some array methods we use are destructive. This means that they mutate the original array. We might not want this to happen, so there are alternatives to these methods that are non-destructive.
+
+// .toReversed() method
+// Destructive = .reverse()
+// Non-destructive = toReversed()
+
+// Using the .reverse() method mutates the original array in the course of its operation, it is a destructive method.
+console.log(`.reverse()`);
+
+console.log(movements2);
+const reversedMovements2 = movements2.reverse();
+console.log(reversedMovements2);
+console.log(movements2);
+
+// To do this non-destructively, we can use the '.toReversed()' method. We use this in the exact same way as 'reverse()' but it will not mutate the orginal array.
+
+console.log(`.toReversed()`);
+
+console.log(movements2);
+const toReversedMovements2 = movements2.toReversed();
+console.log(toReversedMovements2);
+console.log(movements2);
+
+// .toSorted() method
+// Destructive: .sort()
+// Non-destructive: .toSorted()
+
+console.log(`.sort()`);
+
+// .sort() is destructive
+console.log(movements2);
+const sortedMovements2 = movements2.sort();
+console.log(sortedMovements2);
+console.log(movements2);
+
+console.log(`.toSorted()`);
+
+// .toSorted() is non-destructive
+console.log(movements3);
+const toSortedMovements3 = movements3.toSorted();
+console.log(toSortedMovements3);
+console.log(movements3);
+
+// .toSpliced() method
+// Destructive: .splice()
+// Non-destructive: .toSpliced()
+
+console.log(`.splice()`);
+
+// .splice() is destructive, it returns the spliced out value
+console.log(movements2);
+const splicedMovements2 = movements2.splice(0, 1);
+console.log(splicedMovements2);
+console.log(movements2);
+
+console.log(`.toSpliced()`);
+
+// .toSpliced() is non-destructive, it returns the array without the spliced out value
+console.log(movements3);
+const toSplicedMovements3 = movements3.toSpliced(0, 1);
+console.log(toSplicedMovements3);
+console.log(movements3);
+
+// .with() method
+
+// The .with() method is a new method that allows us to modify elements in an array while not mutating the orginal array.
+
+// The .with() array gets an array but updates a specified element in the array to a specified new value. It is non-destructive as a new array is created and the original is not mutated/
+
+console.log(`.with()`);
+
+console.log(movements2);
+const newMovements = movements2.with(1, 9999);
+console.log(newMovements);
+console.log(movements2);
+
+// NOTES
+// SUMMARY: WHICH ARRAY METHOD TO USE?
