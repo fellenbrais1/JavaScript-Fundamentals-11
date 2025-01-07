@@ -51,7 +51,7 @@ const account4 = {
 const account5 = {
   id: 'account5',
   owner: 'Michael McCann',
-  movements: [800, 1650, -710, 990, -10],
+  movements: [1650, 800, 1650, -710, 990, -10, 1650],
   interestRate: 2.5,
   pin: 5555,
   baseCurrency: '£',
@@ -152,6 +152,9 @@ let activeAccount = null;
 // Used with the timers to enable resets
 let intervalId;
 
+// Used to toggle sorting behaviour
+let unSorted = true;
+
 /////////////////////////////////////////////////
 // FUNCTIONS IN ROUGH ORDER OF CALL
 
@@ -223,6 +226,7 @@ function logInController(account) {
   containerApp.style.opacity = 1;
   // Set the loggedIn flag to true
   loggedIn = true;
+  unSorted = true;
   // Retrieve the object for the currently active account and assign it
   activeAccount = setActiveAccount(account);
   // Populate page fields with relevant data
@@ -258,7 +262,7 @@ function populateUI(movements, interestRate, baseCurrency) {
 }
 
 // Creates an HTML element to be populate the table of deposits and withdrawals on the page
-// Called by populateUI()
+// Called by populateUI(), sortMovements()
 function populateMovements(movements, baseCurrency) {
   // This expression clears all HTML out of the element to make it empty
   containerMovements.innerHTML = '';
@@ -571,7 +575,7 @@ function accountTransfer(activeAccount) {
       return;
     } else {
       alert(
-        `Transfer account specified ('${address}'} not found, cancelling process.`
+        `Transfer account specified '${address}' not found, cancelling process.`
       );
       clearInputFields();
       return;
@@ -704,7 +708,7 @@ function closeAccount(username, pin, activeAccount) {
         clearInputFields();
         return;
       } else {
-        accounts = modifyAccountsArray(accountToClose);
+        accounts = deleteFromAccountsArray(accountToClose);
         logOut('closeaccount');
         return;
       }
@@ -722,7 +726,7 @@ function closeAccount(username, pin, activeAccount) {
 
 // Deletes an account from the accounts array when an account is closed
 // Called by closeAccount()
-function modifyAccountsArray(accountToClose) {
+function deleteFromAccountsArray(accountToClose) {
   const newAccounts = accounts.filter(
     current => current.username !== accountToClose.username
   );
@@ -737,45 +741,49 @@ function sortMovementsInit() {
 
 // TODO
 // NEED TO ALLOW SORTING WITHOUT DISTURBING NUMBERING SCHEME
-// NEED TO ADD SUPPORT FOR DIFFERENT TYPES OF SORTS
 
-// Sorts user movements into positive and then negative groupings
+// Sorts user movements into positive and then negative groupings, can be toggled on or off depending on the current Boolean of the unSorted variable
 // Called by sortMovementsInit()
 function sortMovements(activeAccount) {
-  // This expression clears all HTML out of the element to make it empty
-  containerMovements.innerHTML = '';
+  if (unSorted === true) {
+    // This expression clears all HTML out of the element to make it empty
+    containerMovements.innerHTML = '';
 
-  const sortedMovements = activeAccount.movements.sort((a, b) => {
-    if (a < 0 && b >= 0) {
-      return -1;
-    } else if (a >= 0 && b < 0) {
-      return 1;
-    } else {
-      return 0;
-    }
-  });
+    // Create a shallow copy of activeAccount.movements to sort so we don't mutate the original array
+    const workingMovements = activeAccount.movements.slice();
 
-  // Iterate through the movements and add their amount and index number to some HTML in a string literal along with types and times etc.
-  sortedMovements.forEach(function (amount, index) {
-    const type = amount > 0 ? 'deposit' : 'withdrawal';
-    const time = generateTimestamp();
+    const sortedMovements = workingMovements.sort((a, b) => a - b);
 
-    const currencyString = formatCurrencyString(
-      amount,
-      activeAccount.baseCurrency
-    );
-    // Create the HTML that we need in a string literal
-    const html = `<div class="movements__row">
-      <div class="movements__type movements__type--${type}">${
-      index + 1
-    } ${type}</div>
-      <div class="movements__date">${time}</div>
-      <div class="movements__value">${currencyString}</div>
-      </div>`;
+    // Iterate through the movements and add their amount and index number to some HTML in a string literal along with types and times etc.
+    sortedMovements.forEach(function (amount, index) {
+      const type = amount > 0 ? 'deposit' : 'withdrawal';
+      const time = generateTimestamp();
 
-    // Add the above HTML to the element
-    containerMovements.insertAdjacentHTML('afterbegin', html);
-  });
+      const currencyString = formatCurrencyString(
+        amount,
+        activeAccount.baseCurrency
+      );
+      // Create the HTML that we need in a string literal
+      const html = `<div class="movements__row">
+        <div class="movements__type movements__type--${type}">${
+        index + 1
+      } ${type}</div>
+        <div class="movements__date">${time}</div>
+        <div class="movements__value">${currencyString}</div>
+        </div>`;
+
+      // Add the above HTML to the element
+      containerMovements.insertAdjacentHTML('afterbegin', html);
+      unSorted = false;
+      btnSort.innerHTML = '&uparrow; SORT';
+      return;
+    });
+  } else {
+    populateMovements(activeAccount.movements, activeAccount.baseCurrency);
+    unSorted = true;
+    btnSort.innerHTML = '&downarrow; SORT';
+    return;
+  }
 }
 
 // Logs the user out when their session timer has expired and handles logout operations
